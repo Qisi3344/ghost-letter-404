@@ -1,25 +1,23 @@
 {
   "name": "ghost-letter-404",
   "version": "1.0.0",
-  "description": "",
+  "description": "A playable Halloween mechanical universe and ghost letter experience",
   "main": "index.js",
   "scripts": {
     "test": "vitest run",
     "dev": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview --host 127.0.0.1",
-    "test:e2e": "playwright test"
+    "preview": "vite preview --host 127.0.0.1"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "type": "module",
   "dependencies": {
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
-    "@playwright/test": "^1.64.1",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",

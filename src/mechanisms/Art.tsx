@@ -3,7 +3,7 @@ export const ArtDefs=memo(function ArtDefs(){return <defs>
  <linearGradient id="brass" x1="0" y1="0" x2="1" y2=".8"><stop stopColor="#efcf92"/><stop offset=".18" stopColor="#a27442"/><stop offset=".42" stopColor="#edd09b"/><stop offset=".64" stopColor="#79502e"/><stop offset="1" stopColor="#bd8a51"/></linearGradient>
  <linearGradient id="metal" x1="0" x2="1"><stop stopColor="#17151f"/><stop offset=".38" stopColor="#514352"/><stop offset=".6" stopColor="#292330"/><stop offset="1" stopColor="#100f18"/></linearGradient>
  <linearGradient id="edge" x1="0" x2="0" y2="1"><stop stopColor="#b78852"/><stop offset=".3" stopColor="#5d3c2a"/><stop offset="1" stopColor="#241b24"/></linearGradient>
- <radialGradient id="glass" cx=".35" cy=".25"><stop stopColor="#d3c4ef" stopOpacity=".85"/><stop offset=".25" stopColor="#9373b7" stopOpacity=".6"/><stop offset=".65" stopColor="#402955" stopOpacity=".85"/><stop offset=".9" stopColor="#271c3b"/><stop offset="1" stopColor="#a686c8"/></radialGradient>
+ <radialGradient id="glass" cx=".36" cy=".28" r=".78"><stop stopColor="#c0a5e0" stopOpacity=".9"/><stop offset=".23" stopColor="#76528e"/><stop offset=".64" stopColor="#392443"/><stop offset=".9" stopColor="#21192e"/><stop offset="1" stopColor="#493254"/></radialGradient>
  <radialGradient id="core-glow"><stop stopColor="#b79ce6" stopOpacity=".35"/><stop offset="1" stopColor="#9a6ce8" stopOpacity="0"/></radialGradient>
  <linearGradient id="cloth" x1=".1" y1="0" x2=".85" y2="1"><stop stopColor="#fff6e9"/><stop offset=".5" stopColor="#e9e0e8"/><stop offset="1" stopColor="#b4a0c8"/></linearGradient>
  <linearGradient id="hat" x1="0" x2="1" y2="1"><stop stopColor="#5a426c"/><stop offset=".5" stopColor="#30213f"/><stop offset="1" stopColor="#171322"/></linearGradient>
