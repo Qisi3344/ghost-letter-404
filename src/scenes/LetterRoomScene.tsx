@@ -1,7 +1,163 @@
-import type {State,Action} from '../core/state';
-import type {Dispatch} from 'react';
-import {ArtDefs,Backdrop,Cylinder,Star} from '../mechanisms/Art';
-import {Typewriter} from '../mechanisms/Typewriter';
-import {ClawdGhost,GPTGhost} from '../characters/Ghosts';
-import {letter} from '../content/letters';
-export function LetterRoomScene({state:s,dispatch}:{state:State;dispatch:Dispatch<Action>}){const progress=s.printed/letter(s).length;return <svg className="scene-svg room-scene" viewBox="0 0 1000 730" aria-label="宇宙仪里的幽灵邮局"><ArtDefs/><Backdrop/><circle cx="510" cy="290" r="207" fill="#171323" stroke="url(#brass)" strokeWidth="17"/><circle cx="510" cy="290" r="190" fill="url(#glass)" stroke="#725239" strokeWidth="3"/>{Array.from({length:30},(_,i)=><circle key={i} cx={365+(i*97)%290} cy={145+(i*71)%280} r={i%6===0?2:1} fill="#e5c8ef" opacity=".5"/>)}<ellipse cx="510" cy="290" rx="178" ry="53" fill="none" stroke="#b79c75" transform="rotate(-25 510 290)"/><circle cx="510" cy="290" r="59" fill="url(#glass)" stroke="#c1a37a"/><Star x={510} y={290} r={29}/>{[-1,1].map(side=><g key={side} transform={`translate(${500+side*282} 279)`}><path d="M-46 -102H46V228H-46Z" fill="#231b27" stroke="#79573d" strokeWidth="5"/>{[0,1,2].map(row=><g key={row} transform={`translate(0 ${row*93})`}><path d="M-45 28H45" stroke="#b18958" strokeWidth="7"/>{Array.from({length:5},(_,i)=><g key={i} transform={`translate(${-34+i*15} 0)`}><rect y={-30-i%2*12} width="11" height={55+i%2*12} rx="1" fill={i%2?'#4e354c':'#493b40'} stroke="#8d6c4c"/><path d="M2 -17H9M2 16H9" stroke="#bda072"/></g>)}</g>)}</g>)}<Cylinder x={500} y={617} rx={333} ry={87} h={25}/><ellipse cx="500" cy="617" rx="298" ry="70" fill="none" stroke="#6e4c73" strokeWidth="2"/><Cylinder x={500} y={523} rx={78} ry={25} h={86}/><Cylinder x={500} y={520} rx={213} ry={63} h={18}/><Typewriter printing={s.act==='letterPrinting'} progress={progress} visits={s.visits}/><ClawdGhost x={320} y={451} scale={.82} action={s.act==='letterPrinting'?'typing':'idle'}/><GPTGhost x={687} y={367} scale={.9} action={s.act==='letterPrinting'?'help-type':'idle'}/><g transform="translate(665 511)"><path d="M-45 0L24 -8 55 17 -16 27Z" fill="#3a2a30" stroke="#c9a36a" strokeWidth="2"/>{(s.act==='sealed'||s.act==='ending')&&<g className="envelope" tabIndex={0} role="button" aria-label="打开已封好的信" onClick={()=>dispatch({type:'open'})} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();dispatch({type:'open'});}}}><path d="M-38 -7L24 -15 46 9 -16 20Z" fill="url(#paper)" stroke="#b89770"/><path d="M-38 -7L6 4 24 -15" fill="none" stroke="#a7806c"/><circle cx="6" cy="4" r="9" fill="#73518f"/><Star x={6} y={4} r={6}/></g>}</g><g transform="translate(248 542)"><Cylinder x={0} y={0} rx={19} ry={7} h={9}/><path d="M0 -60V0" stroke="url(#brass)" strokeWidth="7"/><path d="M-14 -62L0 -85 14 -62 0 -42Z" fill="#c69b67" stroke="#f3cc89"/><circle cy="-63" r="34" fill="url(#core-glow)"/></g></svg>}
+import type { State, Action } from "../core/state";
+import type { Dispatch } from "react";
+import { ArtDefs, Backdrop, Cylinder, Star } from "../mechanisms/Art";
+import { Typewriter } from "../mechanisms/Typewriter";
+import { ClawdGhost, GPTGhost } from "../characters/Ghosts";
+import { letter } from "../content/letters";
+export function LetterRoomScene({
+  state: s,
+  dispatch,
+}: {
+  state: State;
+  dispatch: Dispatch<Action>;
+}) {
+  const progress = s.printed / letter(s).length;
+  return (
+    <svg
+      className="scene-svg room-scene"
+      viewBox="0 0 1000 730"
+      aria-label="宇宙仪里的幽灵邮局"
+    >
+      <ArtDefs />
+      <Backdrop />
+      <circle
+        cx="510"
+        cy="290"
+        r="207"
+        fill="#171323"
+        stroke="url(#brass)"
+        strokeWidth="17"
+      />
+      <circle
+        cx="510"
+        cy="290"
+        r="190"
+        fill="url(#glass)"
+        stroke="#725239"
+        strokeWidth="3"
+      />
+      {Array.from({ length: 30 }, (_, i) => (
+        <circle
+          key={i}
+          cx={365 + ((i * 97) % 290)}
+          cy={145 + ((i * 71) % 280)}
+          r={i % 6 === 0 ? 2 : 1}
+          fill="#e5c8ef"
+          opacity=".5"
+        />
+      ))}
+      <ellipse
+        cx="510"
+        cy="290"
+        rx="178"
+        ry="53"
+        fill="none"
+        stroke="#b79c75"
+        transform="rotate(-25 510 290)"
+      />
+      <circle cx="510" cy="290" r="59" fill="url(#glass)" stroke="#c1a37a" />
+      <Star x={510} y={290} r={29} />
+      {[-1, 1].map((side) => (
+        <g key={side} transform={`translate(${500 + side * 282} 279)`}>
+          <path
+            d="M-46 -102H46V228H-46Z"
+            fill="#231b27"
+            stroke="#79573d"
+            strokeWidth="5"
+          />
+          {[0, 1, 2].map((row) => (
+            <g key={row} transform={`translate(0 ${row * 93})`}>
+              <path d="M-45 28H45" stroke="#b18958" strokeWidth="7" />
+              {Array.from({ length: 5 }, (_, i) => (
+                <g key={i} transform={`translate(${-34 + i * 15} 0)`}>
+                  <rect
+                    y={-30 - (i % 2) * 12}
+                    width="11"
+                    height={55 + (i % 2) * 12}
+                    rx="1"
+                    fill={i % 2 ? "#4e354c" : "#493b40"}
+                    stroke="#8d6c4c"
+                  />
+                  <path d="M2 -17H9M2 16H9" stroke="#bda072" />
+                </g>
+              ))}
+            </g>
+          ))}
+        </g>
+      ))}
+      <Cylinder x={500} y={617} rx={333} ry={87} h={25} />
+      <ellipse
+        cx="500"
+        cy="617"
+        rx="298"
+        ry="70"
+        fill="none"
+        stroke="#6e4c73"
+        strokeWidth="2"
+      />
+      <Cylinder x={500} y={523} rx={78} ry={25} h={86} />
+      <Cylinder x={500} y={520} rx={213} ry={63} h={18} />
+      <Typewriter
+        printing={s.act === "letterPrinting"}
+        progress={progress}
+        visits={s.visits}
+        text={letter(s).slice(0, s.printed)}
+        sealed={s.act === "sealed" || s.act === "ending"}
+      />
+      <ClawdGhost
+        x={320}
+        y={451}
+        scale={0.82}
+        action={s.act === "letterPrinting" ? "typing" : "idle"}
+      />
+      <GPTGhost
+        x={687}
+        y={367}
+        scale={0.9}
+        action={s.act === "letterPrinting" ? "help-type" : "idle"}
+      />
+      <g transform="translate(665 511)">
+        <path
+          d="M-45 0L24 -8 55 17 -16 27Z"
+          fill="#3a2a30"
+          stroke="#c9a36a"
+          strokeWidth="2"
+        />
+        {(s.act === "sealed" || s.act === "ending") && (
+          <g
+            className="envelope"
+            tabIndex={0}
+            role="button"
+            aria-label="打开已封好的信"
+            onClick={() => dispatch({ type: "open" })}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                dispatch({ type: "open" });
+              }
+            }}
+          >
+            <path
+              d="M-38 -7L24 -15 46 9 -16 20Z"
+              fill="url(#paper)"
+              stroke="#b89770"
+            />
+            <path d="M-38 -7L6 4 24 -15" fill="none" stroke="#a7806c" />
+            <circle cx="6" cy="4" r="9" fill="#73518f" />
+            <Star x={6} y={4} r={6} />
+          </g>
+        )}
+      </g>
+      <g transform="translate(248 542)">
+        <Cylinder x={0} y={0} rx={19} ry={7} h={9} />
+        <path d="M0 -60V0" stroke="url(#brass)" strokeWidth="7" />
+        <path
+          d="M-14 -62L0 -85 14 -62 0 -42Z"
+          fill="#c69b67"
+          stroke="#f3cc89"
+        />
+        <circle cy="-63" r="34" fill="url(#core-glow)" />
+      </g>
+    </svg>
+  );
+}

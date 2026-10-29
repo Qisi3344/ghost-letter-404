@@ -1,3 +1,35 @@
-import {useEffect,useRef} from 'react';
+import { useEffect, useRef } from "react";
 /** One time source for the repaired drive shaft; hidden tabs never accumulate a jump. */
-export function useDriveMotion(active:boolean,still:boolean){const ref=useRef<SVGGElement>(null);useEffect(()=>{if(!active||still||!ref.current)return;let frame=0,last=0,phase=0;const tick=(now:number)=>{const dt=last?Math.min((now-last)/1000,.05):0;last=now;if(!document.hidden){phase+=dt*22;ref.current?.querySelectorAll<SVGGElement>('[data-drive]').forEach(el=>{const ratio=Number(el.dataset.drive);el.setAttribute('transform',`rotate(${phase*ratio})`);});}frame=requestAnimationFrame(tick);};const visibility=()=>{last=0;};document.addEventListener('visibilitychange',visibility);frame=requestAnimationFrame(tick);return()=>{cancelAnimationFrame(frame);document.removeEventListener('visibilitychange',visibility);};},[active,still]);return ref;}
+export function useDriveMotion(active: boolean, still: boolean) {
+  const ref = useRef<SVGGElement>(null);
+  useEffect(() => {
+    if (!active || still || !ref.current) return;
+    let frame = 0,
+      last = 0,
+      phase = 0;
+    const tick = (now: number) => {
+      const dt = last ? Math.min((now - last) / 1000, 0.05) : 0;
+      last = now;
+      if (!document.hidden) {
+        phase += dt * 22;
+        ref.current
+          ?.querySelectorAll<SVGGElement>("[data-drive]")
+          .forEach((el) => {
+            const ratio = Number(el.dataset.drive);
+            el.setAttribute("transform", `rotate(${phase * ratio})`);
+          });
+      }
+      frame = requestAnimationFrame(tick);
+    };
+    const visibility = () => {
+      last = 0;
+    };
+    document.addEventListener("visibilitychange", visibility);
+    frame = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(frame);
+      document.removeEventListener("visibilitychange", visibility);
+    };
+  }, [active, still]);
+  return ref;
+}

@@ -1,5 +1,101 @@
-import {arc,polar,ringHalf} from '../core/geometry';
-import {angles,type State} from '../core/state';
-import {Star} from './Art';
-const rings=[{rx:277,ry:91,tilt:-17,y:300,width:15},{rx:242,ry:81,tilt:18,y:337,width:13},{rx:205,ry:68,tilt:-9,y:393,width:12}];
-export function OrbitRings({state:s,front}:{state:State;front:boolean}){const a=angles(s.outerAngle);const rotations=[a.outer,a.middle,a.inner];return <g className={front?'rings-front':'rings-back'}>{rings.map((r,i)=><g key={i} transform={`translate(500 ${r.y}) rotate(${r.tilt})`}><path d={ringHalf(r.rx,r.ry,r.width,front)} transform="translate(0 10)" fill="url(#edge)" stroke="#68472e"/><path d={ringHalf(r.rx,r.ry,r.width,front)} fill="url(#brass)" stroke="#e6c48b" strokeWidth=".6"/><path d={arc(r.rx-6,r.ry-2.5,front?0:180,front?180:360)} transform="translate(0 6)" fill="none" stroke="#332331" strokeWidth="5"/>{Array.from({length:36},(_,j)=>{const deg=(j*10+rotations[i])%360;if((deg<180)!==front)return null;const [x,y]=polar(r.rx-7,deg,r.ry/r.rx);return <g key={j} transform={`translate(${x} ${y+3})`}><path d={j%3===0?'M-2 -2L0 -5 2 -2 0 1Z':'M0 -2v3'} stroke="#e5bf80" fill="none" strokeWidth="1"/></g>})}{i>0&&(()=>{const deg=rotations[i],target=i===1?120:75;const p=polar(r.rx,deg,r.ry/r.rx),t=polar(r.rx,target,r.ry/r.rx);return <>{((target<180)===front)&&<g transform={`translate(${t[0]} ${t[1]})`}><circle r="20" fill="#281d36" stroke={s.act==='aligning'?'#c4a1ef':'#ae8755'} strokeWidth="2"/><Star r={12} fill="#8e67bb"/></g>}{((deg<180)===front)&&<g transform={`translate(${p[0]} ${p[1]-13})`}><path d="M0 13V25" stroke="#c09966" strokeWidth="5"/><circle r={i===1?22:17} fill="url(#glass)" stroke={i===1?'#e8cb9a':'#a3b9eb'} strokeWidth="1.5"/><path d="M-10 -10Q-4 -17 4 -15" fill="none" stroke="#f7e8ff" strokeOpacity=".75" strokeWidth="2"/><circle cx="7" cy="6" r="2" fill="#d8bdec"/></g>}</>})()}</g>)}</g>}
+import { arc, polar, ringHalf } from "../core/geometry";
+import { angles, type State } from "../core/state";
+import { Star } from "./Art";
+const rings = [
+  { rx: 277, ry: 91, tilt: -17, y: 300, width: 15 },
+  { rx: 242, ry: 81, tilt: 18, y: 337, width: 13 },
+  { rx: 205, ry: 68, tilt: -9, y: 393, width: 12 },
+];
+export function OrbitRings({
+  state: s,
+  front,
+}: {
+  state: State;
+  front: boolean;
+}) {
+  const a = angles(s.outerAngle);
+  const rotations = [a.outer, a.middle, a.inner];
+  return (
+    <g className={front ? "rings-front" : "rings-back"}>
+      {rings.map((r, i) => (
+        <g key={i} transform={`translate(500 ${r.y}) rotate(${r.tilt})`}>
+          <path
+            d={ringHalf(r.rx, r.ry, r.width, front)}
+            transform="translate(0 10)"
+            fill="url(#edge)"
+            stroke="#68472e"
+          />
+          <path
+            d={ringHalf(r.rx, r.ry, r.width, front)}
+            fill="url(#brass)"
+            stroke="#e6c48b"
+            strokeWidth=".6"
+          />
+          <path
+            d={arc(r.rx - 6, r.ry - 2.5, front ? 0 : 180, front ? 180 : 360)}
+            transform="translate(0 6)"
+            fill="none"
+            stroke="#332331"
+            strokeWidth="5"
+          />
+          {Array.from({ length: 36 }, (_, j) => {
+            const deg = (j * 10 + rotations[i]) % 360;
+            if (deg < 180 !== front) return null;
+            const [x, y] = polar(r.rx - 7, deg, r.ry / r.rx);
+            return (
+              <g key={j} transform={`translate(${x} ${y + 3})`}>
+                <path
+                  d={j % 3 === 0 ? "M-2 -2L0 -5 2 -2 0 1Z" : "M0 -2v3"}
+                  stroke="#e5bf80"
+                  fill="none"
+                  strokeWidth="1"
+                />
+              </g>
+            );
+          })}
+          {i > 0 &&
+            (() => {
+              const deg = rotations[i],
+                target = i === 1 ? 120 : 75;
+              const p = polar(r.rx, deg, r.ry / r.rx),
+                t = polar(r.rx, target, r.ry / r.rx);
+              return (
+                <>
+                  {target < 180 === front && (
+                    <g transform={`translate(${t[0]} ${t[1]})`}>
+                      <circle
+                        r="20"
+                        fill="#281d36"
+                        stroke={s.act === "aligning" ? "#c4a1ef" : "#ae8755"}
+                        strokeWidth="2"
+                      />
+                      <Star r={12} fill="#8e67bb" />
+                    </g>
+                  )}
+                  {deg < 180 === front && (
+                    <g transform={`translate(${p[0]} ${p[1] - 13})`}>
+                      <path d="M0 13V25" stroke="#c09966" strokeWidth="5" />
+                      <circle
+                        r={i === 1 ? 22 : 17}
+                        fill="url(#glass)"
+                        stroke={i === 1 ? "#e8cb9a" : "#a3b9eb"}
+                        strokeWidth="1.5"
+                      />
+                      <path
+                        d="M-10 -10Q-4 -17 4 -15"
+                        fill="none"
+                        stroke="#f7e8ff"
+                        strokeOpacity=".75"
+                        strokeWidth="2"
+                      />
+                      <circle cx="7" cy="6" r="2" fill="#d8bdec" />
+                    </g>
+                  )}
+                </>
+              );
+            })()}
+        </g>
+      ))}
+    </g>
+  );
+}

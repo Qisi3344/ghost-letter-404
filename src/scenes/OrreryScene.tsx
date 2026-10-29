@@ -1,12 +1,302 @@
-import {memo,type Dispatch} from 'react';
-import {type State,type Action} from '../core/state';
-import {polar} from '../core/geometry';
-import {useDrag} from '../core/useDrag';
-import {ArtDefs,Backdrop,Cylinder,Star} from '../mechanisms/Art';
-import {Crank} from '../mechanisms/Crank';
-import {GearAssembly} from '../mechanisms/GearAssembly';
-import {OrbitRings} from '../mechanisms/OrbitRings';
-import {ClawdGhost,GPTGhost} from '../characters/Ghosts';
-const Base=memo(function Base(){return <g><ellipse cx="500" cy="677" rx="331" ry="51" fill="#08060d" opacity=".65"/>{[260,380,620,740].map(x=><g key={x}><Cylinder x={x} y={638} rx={24} ry={10} h={29}/><Cylinder x={x} y={663} rx={32} ry={11} h={8}/></g>)}<Cylinder x={500} y={616} rx={325} ry={92} h={38}/><Cylinder x={500} y={605} rx={335} ry={92} h={15}/><ellipse cx="500" cy="603" rx="305" ry="80" fill="none" stroke="#8e6c4a" strokeWidth="2"/><ellipse cx="500" cy="603" rx="283" ry="72" fill="none" stroke="#60436f" strokeWidth="5"/>{Array.from({length:60},(_,i)=>{let [x,y]=polar(318,i*6,.275);return <path key={i} d={`M${500+x} ${603+y}l${-x*.025} ${-y*.025}`} stroke="#bd9864" strokeWidth={i%5===0?2:1}/>})}<Cylinder x={500} y={545} rx={100} ry={31} h={58}/>{Array.from({length:11},(_,i)=><path key={i} d={`M${412+i*17.6} ${564+Math.sin(i/10*Math.PI)*12}v36`} stroke={i%2===0?'#b48a55':'#6e4c7f'} strokeWidth={i%2===0?5:3}/>)}<Cylinder x={500} y={537} rx={112} ry={32} h={12}/><rect x="433" y="638" width="134" height="25" rx="3" fill="#251c26" stroke="#b38b57"/><circle cx="442" cy="650" r="2" fill="#d6b77c"/><circle cx="558" cy="650" r="2" fill="#d6b77c"/><text x="500" y="655" textAnchor="middle" fill="#d7b580" fontFamily="serif" fontSize="11" letterSpacing="3">UNIVERSE · 404</text></g>});
-function Pillars(){return <g>{[[-230,472],[-165,489],[165,489],[230,472]].map(([x,y],i)=><g key={i}><Cylinder x={500+x} y={y+91} rx={20} ry={8} h={7}/><Cylinder x={500+x} y={y} rx={10} ry={5} h={95}/><path d={`M${497+x} ${y+8}v77`} stroke="#d2ad70" strokeWidth="2"/><Cylinder x={500+x} y={y-4} rx={18} ry={7} h={9}/></g>)}</g>}
-export function OrreryScene({state:s,dispatch}:{state:State;dispatch:Dispatch<Action>}){const drag=useDrag(dx=>dispatch({type:'orbit',delta:dx*.65}));return <svg className={`scene-svg orrery ${s.act==='folding'?'folding':''}`} viewBox="0 0 1000 730" aria-label="机械宇宙折叠仪"><ArtDefs/><Backdrop/><g className="machine"><Base/><Pillars/><path d="M500 161V529" stroke="#201924" strokeWidth="23"/><path d="M496 161V529" stroke="url(#brass)" strokeWidth="10"/>{[177,210,455,481,518].map(y=><Cylinder key={y} x={500} y={y} rx={y===518?38:20} ry={7} h={9}/>)}<OrbitRings state={s} front={false}/><g className="core" role="button" tabIndex={s.act==='coreReady'?0:-1} aria-label="点亮核心，进入幽灵邮局" onClick={()=>dispatch({type:'light'})} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();dispatch({type:'light'});}}}><circle cx="500" cy="333" r="150" fill="url(#core-glow)"/><circle cx="500" cy="333" r="97" fill="url(#glass)" stroke="#c9a5de" strokeWidth="2"/><circle cx="500" cy="333" r="89" fill="none" stroke="#b498cb" strokeOpacity=".3"/><ellipse cx="500" cy="333" rx="40" ry="95" fill="none" stroke="#b59bce" opacity=".3" transform="rotate(28 500 333)"/><path d="M437 283Q455 252 492 251" fill="none" stroke="#f2d8ed" strokeWidth="5" opacity=".4"/>{Array.from({length:27},(_,i)=>{const [x,y]=polar(20+(i*17)%63,i*137.5);return <circle key={i} cx={500+x} cy={333+y} r={i%3===0?1.4:.8} fill="#dbc4ee" opacity=".5"/>})}<g className={s.act==='coreReady'?'core-ready':''}><Star x={500} y={333} r={s.act==='coreReady'?50:35} fill={s.act==='intro'?'#8d779e':'#e4c8f7'}/></g><g className="hatch"><path d="M460 400V320A40 40 0 0 1 80 0V400Z" fill="#171021" stroke="#ceac77" strokeWidth="4"/><path className="door-left" d="M500 280A40 40 0 0 0 460 320V400H500Z" fill="url(#metal)"/><path className="door-right" d="M500 280A40 40 0 0 1 540 320V400H500Z" fill="url(#metal)"/></g></g><OrbitRings state={s} front/><g {...drag} className={`drag-target orbit-control ${s.act==='aligning'?'active':''}`} tabIndex={s.act==='aligning'?0:-1} role="slider" aria-label="校准双星，左右拖动轨道或按方向键" aria-valuemin={0} aria-valuemax={360} aria-valuenow={Math.round(s.outerAngle)} onKeyDown={e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();dispatch({type:'orbit',delta:e.key==='ArrowRight'?10:-10});}}}><path d="M240 391Q500 518 761 388" fill="none" stroke="transparent" strokeWidth="55"/>{s.act==='aligning'&&<g transform="translate(728 413)"><circle r="24" fill="#35243f" stroke="#c4a2e6"/><path d="M-12 0H12M-6 -6L-12 0 -6 6M6 -6L12 0 6 6" stroke="#e3c7f4" fill="none" strokeWidth="1.8"/></g>}</g><Cylinder x={500} y={152} rx={24} ry={8} h={14}/><Star x={500} y={119} r={30}/><GearAssembly state={s} dispatch={dispatch}/><Crank state={s} dispatch={dispatch}/><ClawdGhost x={234} y={526} scale={.8} action={s.act==='intro'?'peek':s.act==='coreReady'?'celebrate':'idle'}/><GPTGhost x={762} y={253} scale={.77} action={s.act==='aligning'?'guide':'idle'}/></g></svg>}
+import { memo, type Dispatch } from "react";
+import { type State, type Action } from "../core/state";
+import { polar } from "../core/geometry";
+import { useDrag } from "../core/useDrag";
+import { ArtDefs, Backdrop, Cylinder, Star } from "../mechanisms/Art";
+import { Crank } from "../mechanisms/Crank";
+import { Supports } from "../mechanisms/Supports";
+import { GearAssembly } from "../mechanisms/GearAssembly";
+import { OrbitRings } from "../mechanisms/OrbitRings";
+import { LightBridge } from "../mechanisms/LightBridge";
+import { ClawdGhost, GPTGhost } from "../characters/Ghosts";
+const Base = memo(function Base() {
+  return (
+    <g>
+      <ellipse
+        cx="500"
+        cy="677"
+        rx="331"
+        ry="51"
+        fill="#08060d"
+        opacity=".65"
+      />
+      {[260, 380, 620, 740].map((x) => (
+        <g key={x}>
+          <Cylinder x={x} y={638} rx={24} ry={10} h={29} />
+          <Cylinder x={x} y={663} rx={32} ry={11} h={8} />
+        </g>
+      ))}
+      <Cylinder x={500} y={616} rx={325} ry={92} h={38} />
+      <Cylinder x={500} y={605} rx={335} ry={92} h={15} />
+      <ellipse
+        cx="500"
+        cy="603"
+        rx="305"
+        ry="80"
+        fill="none"
+        stroke="#8e6c4a"
+        strokeWidth="2"
+      />
+      <ellipse
+        cx="500"
+        cy="603"
+        rx="283"
+        ry="72"
+        fill="none"
+        stroke="#60436f"
+        strokeWidth="5"
+      />
+      {Array.from({ length: 60 }, (_, i) => {
+        let [x, y] = polar(318, i * 6, 0.275);
+        return (
+          <path
+            key={i}
+            d={`M${500 + x} ${603 + y}l${-x * 0.025} ${-y * 0.025}`}
+            stroke="#bd9864"
+            strokeWidth={i % 5 === 0 ? 2 : 1}
+          />
+        );
+      })}
+      <Cylinder x={500} y={545} rx={100} ry={31} h={58} />
+      {Array.from({ length: 11 }, (_, i) => (
+        <path
+          key={i}
+          d={`M${412 + i * 17.6} ${564 + Math.sin((i / 10) * Math.PI) * 12}v36`}
+          stroke={i % 2 === 0 ? "#b48a55" : "#6e4c7f"}
+          strokeWidth={i % 2 === 0 ? 5 : 3}
+        />
+      ))}
+      <Cylinder x={500} y={537} rx={112} ry={32} h={12} />
+      <rect
+        x="433"
+        y="638"
+        width="134"
+        height="25"
+        rx="3"
+        fill="#251c26"
+        stroke="#b38b57"
+      />
+      <circle cx="442" cy="650" r="2" fill="#d6b77c" />
+      <circle cx="558" cy="650" r="2" fill="#d6b77c" />
+      <text
+        x="500"
+        y="655"
+        textAnchor="middle"
+        fill="#d7b580"
+        fontFamily="serif"
+        fontSize="11"
+        letterSpacing="3"
+      >
+        UNIVERSE · 404
+      </text>
+    </g>
+  );
+});
+function Pillars() {
+  return (
+    <g>
+      {[
+        [-230, 472],
+        [-165, 489],
+        [165, 489],
+        [230, 472],
+      ].map(([x, y], i) => (
+        <g key={i}>
+          <Cylinder x={500 + x} y={y + 91} rx={20} ry={8} h={7} />
+          <Cylinder x={500 + x} y={y} rx={10} ry={5} h={95} />
+          <path
+            d={`M${497 + x} ${y + 8}v77`}
+            stroke="#d2ad70"
+            strokeWidth="2"
+          />
+          <Cylinder x={500 + x} y={y - 4} rx={18} ry={7} h={9} />
+        </g>
+      ))}
+    </g>
+  );
+}
+export function OrreryScene({
+  state: s,
+  dispatch,
+}: {
+  state: State;
+  dispatch: Dispatch<Action>;
+}) {
+  const drag = useDrag((dx) => dispatch({ type: "orbit", delta: dx * 0.65 }));
+  return (
+    <svg
+      className={`scene-svg orrery ${s.act === "folding" ? "folding" : ""}`}
+      viewBox="0 0 1000 730"
+      aria-label="机械宇宙折叠仪"
+    >
+      <ArtDefs />
+      <Backdrop />
+      <g className="machine">
+        <Base />
+        <Pillars />
+        <Supports />
+        <path d="M500 161V529" stroke="#201924" strokeWidth="23" />
+        <path d="M496 161V529" stroke="url(#brass)" strokeWidth="10" />
+        {[177, 210, 455, 481, 518].map((y) => (
+          <Cylinder
+            key={y}
+            x={500}
+            y={y}
+            rx={y === 518 ? 38 : 20}
+            ry={7}
+            h={9}
+          />
+        ))}
+        <OrbitRings state={s} front={false} />
+        <g
+          className="core"
+          role="button"
+          tabIndex={s.act === "coreReady" ? 0 : -1}
+          aria-label="点亮核心，进入幽灵邮局"
+          onClick={() => dispatch({ type: "light" })}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              dispatch({ type: "light" });
+            }
+          }}
+        >
+          <circle cx="500" cy="333" r="150" fill="url(#core-glow)" />
+          <circle
+            cx="500"
+            cy="333"
+            r="97"
+            fill="url(#glass)"
+            stroke="#c9a5de"
+            strokeWidth="2"
+          />
+          <circle
+            cx="500"
+            cy="333"
+            r="89"
+            fill="none"
+            stroke="#b498cb"
+            strokeOpacity=".3"
+          />
+          <ellipse
+            cx="500"
+            cy="333"
+            rx="40"
+            ry="95"
+            fill="none"
+            stroke="#b59bce"
+            opacity=".3"
+            transform="rotate(28 500 333)"
+          />
+          <path
+            d="M437 283Q455 252 492 251"
+            fill="none"
+            stroke="#f2d8ed"
+            strokeWidth="5"
+            opacity=".4"
+          />
+          {Array.from({ length: 27 }, (_, i) => {
+            const [x, y] = polar(20 + ((i * 17) % 63), i * 137.5);
+            return (
+              <circle
+                key={i}
+                cx={500 + x}
+                cy={333 + y}
+                r={i % 3 === 0 ? 1.4 : 0.8}
+                fill="#dbc4ee"
+                opacity=".5"
+              />
+            );
+          })}
+          <g className={s.act === "coreReady" ? "core-ready" : ""}>
+            <Star
+              x={500}
+              y={333}
+              r={s.act === "coreReady" ? 50 : 35}
+              fill={s.act === "intro" ? "#8d779e" : "#e4c8f7"}
+            />
+          </g>
+          <g className="hatch">
+            <path
+              d="M460 400V320A40 40 0 0 1 80 0V400Z"
+              fill="#171021"
+              stroke="#ceac77"
+              strokeWidth="4"
+            />
+            <path
+              className="door-left"
+              d="M500 280A40 40 0 0 0 460 320V400H500Z"
+              fill="url(#metal)"
+            />
+            <path
+              className="door-right"
+              d="M500 280A40 40 0 0 1 540 320V400H500Z"
+              fill="url(#metal)"
+            />
+          </g>
+        </g>
+        {(s.act === "coreReady" || s.act === "folding") && <LightBridge />}
+        <OrbitRings state={s} front />
+        <g
+          {...drag}
+          className={`drag-target orbit-control ${s.act === "aligning" ? "active" : ""}`}
+          tabIndex={s.act === "aligning" ? 0 : -1}
+          role="slider"
+          aria-label="校准双星，左右拖动轨道或按方向键"
+          aria-valuemin={0}
+          aria-valuemax={360}
+          aria-valuenow={Math.round(s.outerAngle)}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+              e.preventDefault();
+              dispatch({
+                type: "orbit",
+                delta: e.key === "ArrowRight" ? 10 : -10,
+              });
+            }
+          }}
+        >
+          <path
+            d="M240 391Q500 518 761 388"
+            fill="none"
+            stroke="transparent"
+            strokeWidth="55"
+          />
+          {s.act === "aligning" && (
+            <g transform="translate(728 413)">
+              <circle r="24" fill="#35243f" stroke="#c4a2e6" />
+              <path
+                d="M-12 0H12M-6 -6L-12 0 -6 6M6 -6L12 0 6 6"
+                stroke="#e3c7f4"
+                fill="none"
+                strokeWidth="1.8"
+              />
+            </g>
+          )}
+        </g>
+        <Cylinder x={500} y={152} rx={24} ry={8} h={14} />
+        <Star x={500} y={119} r={30} />
+        <GearAssembly state={s} dispatch={dispatch} />
+        <Crank state={s} dispatch={dispatch} />
+        <ClawdGhost
+          x={234}
+          y={526}
+          scale={0.8}
+          action={
+            s.act === "intro"
+              ? "peek"
+              : s.act === "coreReady"
+                ? "celebrate"
+                : "idle"
+          }
+        />
+        <GPTGhost
+          x={762}
+          y={253}
+          scale={0.77}
+          action={s.act === "aligning" ? "guide" : "idle"}
+        />
+      </g>
+    </svg>
+  );
+}
