@@ -1,0 +1,66 @@
+name: Extract repository materials ZIP
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/extract-materials.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Extract 素材.zip into its own folder
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path, PurePosixPath
+          from zipfile import ZipFile
+          import stat
+
+          archive = Path("素材.zip")
+          target = Path("assets-materials")
+          if not archive.is_file():
+              raise SystemExit("Cannot find 素材.zip")
+          if target.exists():
+              raise SystemExit("Target assets-materials already exists; refusing overwrite")
+          with ZipFile(archive) as z:
+              members = z.infolist()
+              total = sum(info.file_size for info in members)
+              if total > 300 * 1024 * 1024 or len(members) > 5000:
+                  raise SystemExit("Archive too large; stop to inspect")
+              for info in members:
+                  name = info.filename.replace("\\", "/")
+                  path = PurePosixPath(name)
+                  if path.is_absolute() or ".." in path.parts or not name or ":" in path.parts[0]:
+                      raise SystemExit(f"Unsafe ZIP path: {name!r}")
+                  mode = info.external_attr >> 16
+                  if stat.S_ISLNK(mode):
+                      raise SystemExit(f"Symlink in ZIP not allowed: {name!r}")
+                  dest = target.joinpath(*path.parts)
+                  if info.is_dir():
+                      dest.mkdir(parents=True, exist_ok=True)
+                  else:
+                      dest.parent.mkdir(parents=True, exist_ok=True)
+                      with z.open(info) as src, dest.open("wb") as dst:
+                          import shutil
+                          shutil.copyfileobj(src, dst)
+              print(f"Extracted {len(members)} ZIP entries into {target}")
+          PY
+      - name: Commit extracted files without changing the original ZIP
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- assets-materials/
+          if git diff --cached --quiet; then
+            echo "Nothing extracted to commit"
+          else
+            git commit -m "assets: extract 素材.zip into assets-materials directory"
+            git push origin HEAD:main
+          fi
