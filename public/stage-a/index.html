@@ -63,6 +63,11 @@
       a:focus-visible {
         outline: 2px solid #bba0ee;
       }
+      a[aria-current="page"] {
+        color: #e9c997;
+        text-decoration: underline;
+        text-underline-offset: 5px;
+      }
       #error {
         color: #dfb4c4;
         text-align: center;
@@ -119,8 +124,17 @@
         window.scene = scene;
         let t = 0,
           last = performance.now(),
-          visible = true;
-        const fixed = poses[Number(params.get("pose"))] || poses[0];
+          visible = true,
+          frameId = 0;
+        const poseIndex = poses[Number(params.get("pose"))]
+            ? Number(params.get("pose"))
+            : 0,
+          fixed = poses[poseIndex];
+        document
+          .querySelectorAll("nav a")
+          [
+            params.has("depth") ? 4 : params.has("motion") ? 3 : poseIndex
+          ].setAttribute("aria-current", "page");
         const draw = () =>
           scene.render(
             params.has("motion") && !calm.matches
@@ -130,24 +144,29 @@
           );
         draw();
         new ResizeObserver(draw).observe(canvas);
-        new IntersectionObserver(
-          (e) => (visible = e[0].isIntersecting),
-        ).observe(canvas);
+        const moving = () =>
+          visible && !document.hidden && params.has("motion") && !calm.matches;
         function frame(now) {
-          if (
-            visible &&
-            !document.hidden &&
-            params.has("motion") &&
-            !calm.matches
-          ) {
-            t += Math.min(0.05, (now - last) / 1000);
-            draw();
-          }
+          t += Math.min(0.05, (now - last) / 1000);
+          draw();
           last = now;
-          requestAnimationFrame(frame);
+          if (moving()) frameId = requestAnimationFrame(frame);
         }
-        requestAnimationFrame(frame);
-        calm.addEventListener("change", draw);
+        function schedule() {
+          cancelAnimationFrame(frameId);
+          last = performance.now();
+          if (moving()) frameId = requestAnimationFrame(frame);
+        }
+        new IntersectionObserver((e) => {
+          visible = e[0].isIntersecting;
+          schedule();
+        }).observe(canvas);
+        document.addEventListener("visibilitychange", schedule);
+        calm.addEventListener("change", () => {
+          draw();
+          schedule();
+        });
+        schedule();
       } catch (e) {
         document.querySelector("#error").textContent = e.message;
         console.error(e);

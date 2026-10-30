@@ -1,4 +1,4 @@
-import { geometry, materials, poses, center, ringSpecs } from "./model.mjs";
+import { geometry, materials, poses, center } from "./model.mjs";
 import { fitProjection, cameraOf, iso } from "../p0/vendor/iso-kit.mjs";
 export const camera = fitProjection(
   [
@@ -97,14 +97,14 @@ export function start(
       shared +
       `
  uniform vec4 cam;uniform vec2 origin,frameSize;uniform float scale;
- out vec3 p,n,tangent;out vec4 shadow;out vec3 local;
- void main(){p=worldPoint();n=worldNormal();local=position;vec3 T=normalize(vec3(-position.y,position.x,.0001));tangent=joint>.5?turns[int(joint)-1]*T:T;shadow=shadowPosition(p);
+ out vec3 p,n;out vec4 shadow;out vec3 local;
+ void main(){p=worldPoint();n=worldNormal();local=position;shadow=shadowPosition(p);
  vec2 xy=origin+scale*vec2(p.x*cam.x-p.y*cam.y,(p.x*cam.y+p.y*cam.x)*cam.z-p.z*cam.w);
  float depth=(p.x*cam.y+p.y*cam.x)*cam.w+p.z*cam.z;
  gl_Position=vec4(xy.x/(frameSize.x*.5)-1.,1.-xy.y/(frameSize.y*.5),-depth/800.,1.);}`,
     `#version 300 es
  precision highp float;
- in vec3 p,n,tangent,local;in vec4 shadow;uniform sampler2D shadowMap;
+ in vec3 p,n,local;in vec4 shadow;uniform sampler2D shadowMap;
  uniform vec3 eye,color,lightDir;uniform float metal,rough,emission,kind,debug;
  out vec4 frag;
  float nebula(vec3 q){
@@ -113,18 +113,45 @@ export function start(
  float filaments=pow(.5+.5*sin(a*3.-r*19.+q.z*7.),3.);
  return band*filaments*smoothstep(.12,.4,r)*(1.-smoothstep(.62,.94,length(q)));
  }
+ // Finite ceiling cards produce reflections that move across a planar metal face.
+ float lightCard(vec3 point,vec3 ray,vec3 source,vec2 size,float blur){
+ if(ray.z<.001)return 0.;float t=(source.z-point.z)/ray.z;if(t<=0.)return 0.;
+ vec2 uv=(point+ray*t-source).xy/size;
+ return (1.-smoothstep(1.-blur,1.+blur,abs(uv.x)))*(1.-smoothstep(1.-blur,1.+blur,abs(uv.y)));
+ }
+ vec3 surface(vec3 N,vec3 R,float key,float shade,float rim){
+ vec3 L=normalize(vec3(-180.,160.,500.)-p),H=normalize(L+eye);
+ float NoV=max(dot(N,eye),.001),NoL=max(dot(N,L),0.),NoH=max(dot(N,H),0.),VoH=max(dot(eye,H),0.);
+ float a=max(.035,rough*rough),a2=a*a,den=NoH*NoH*(a2-1.)+1.;
+ float D=a2/(3.14159265*den*den),k=(rough+1.)*(rough+1.)/8.;
+ float G=(NoV/(NoV*(1.-k)+k))*(NoL/(NoL*(1.-k)+k));
+ vec3 F0=mix(vec3(.04),color,metal),F=F0+(1.-F0)*pow(1.-VoH,5.);
+ vec3 diffuse=color*(1.-metal)*(.12+key*shade*.7);
+ vec3 specular=D*G*F/(4.*NoV*max(NoL,.001));
+ vec3 rgb=diffuse+specular*NoL*vec3(1.6,1.3,1.05)*shade;
+ float reflection=lightCard(p,R,vec3(-300.,-600.,520.),vec2(200.,450.),.12+rough*.8);
+ float strip=lightCard(p,R,vec3(240.,80.,440.),vec2(30.,240.),.1+rough*.6);
+ vec3 env=vec3(.14,.10,.18)+vec3(1.8,1.4,.85)*reflection+vec3(.35,.32,.65)*strip;
+ env+=vec3(.85,.7,.48)*pow(max(dot(R,normalize(vec3(-.45,-.65,.6))),0.),10.);
+ rgb+=env*(F0+(1.-F0)*pow(1.-NoV,5.))*(.15+metal*.85)*(1.-rough*.6);
+ rgb+=color*max(dot(N,normalize(vec3(.7,.5,.3))),0.)*.12*(1.-metal*.6);
+ rgb+=vec3(.012,.006,.025)*rim;
+ return rgb;
+ }
  float visibility(vec3 N){vec3 q=shadow.xyz*.5+.5;float bias=max(.0006,.0018*(1.-dot(N,lightDir))),sum=0.;
  for(int x=-1;x<=1;x++)for(int y=-1;y<=1;y++){float d=texture(shadowMap,q.xy+vec2(float(x),float(y))/2048.).r;sum+=q.z-bias>d?.25:1.;}return sum/9.;}
- void main(){vec3 N=normalize(n);if(!gl_FrontFacing)N=-N;float facing=max(dot(N,eye),0.),key=max(dot(N,lightDir),0.),shade=visibility(N);
- vec3 H=normalize(lightDir+eye);float spec=pow(max(dot(N,H),0.),mix(180.,12.,rough));
+ void main(){vec3 N=normalize(n);if(!gl_FrontFacing)N=-N;
+ if(debug>.5){
+ if(kind==2.){frag=vec4(.024,.017,.039,1.);return;}
+ float d=clamp((dot(p-vec3(0.,0.,200.),eye)+140.)/300.,0.,1.);
+ vec3 rgb=d<.5?mix(vec3(.12,.32,.8),vec3(.55,.18,.65),d*2.):mix(vec3(.55,.18,.65),vec3(1.,.65,.18),d*2.-1.);
+ rgb*=.55+.45*max(dot(N,eye),0.);frag=vec4(rgb,kind==1.?.16:1.);return;
+ }
+ float facing=max(dot(N,eye),0.),key=max(dot(N,lightDir),0.),shade=visibility(N);
+ if(kind==2.){float fade=1.-smoothstep(205.,350.,length(p.xy));frag=vec4(mix(vec3(.024,.017,.039),vec3(.065,.045,.09)*(.4+.6*shade),fade),1.);return;}
  vec3 R=reflect(-eye,N);float softbox=pow(max(dot(R,normalize(vec3(-.6,-.2,1.))),0.),20.)+pow(max(dot(R,normalize(vec3(.8,.1,.7))),0.),55.)*.6;
  float rim=pow(1.-facing,4.);
- vec3 T=normalize(tangent),B=normalize(cross(N,T));
- float brushed=exp(-pow(dot(H,T)/.2,2.)-pow(dot(H,B)/.55,2.))*key;
- softbox+=brushed*.75;
- vec3 rgb=color*(.09+key*shade*.85)*(1.-metal*.64)+mix(vec3(.04),color,metal)*(spec*shade*3.8+softbox*1.8)*(.4+metal)+vec3(.018,.009,.035)*rim;
- // A restrained cool fill preserves the unlit thickness faces.
- rgb+=color*max(dot(N,normalize(vec3(.7,.5,.3))),0.)*.11;
+ vec3 rgb=surface(N,R,key,shade,rim);
  float grain=sin(local.z*28.+length(local.xy)*17.)*.012;
  rgb*=1.+metal*grain;
  vec3 toCore=vec3(0.,0.,236.)-p;float distance2=dot(toCore,toCore);rgb+=vec3(.12,.055,.25)*max(dot(N,normalize(toCore)),0.)*1200./(distance2+1200.);
@@ -138,10 +165,7 @@ export function start(
  for(int i=0;i<20;i++){vec3 samplePoint=q-eye*span*(float(i)+.5)/20.;density+=nebula(samplePoint)*span/20.;}
  rgb+=vec3(.3,.09,.8)*density*20.;alpha=clamp(alpha+density*3.,.025,.9);}
  }
- if(kind==2.){float radius=length(p.xy);rgb=vec3(.009,.006,.016)*(.45+.55*shade);rgb*=1.-smoothstep(220.,360.,radius);}
- if(debug>.5){float d=dot(p-vec3(0.,0.,200.),eye);rgb=d>70.?vec3(.9,.55,.18):d< -20.?vec3(.2,.4,.8):vec3(.5,.2,.7);alpha=kind==1.?.2:1.;}
  rgb=pow(rgb/(rgb+vec3(.8)),vec3(1./2.2));
- if(kind==2.&&debug<.5){float fade=1.-smoothstep(205.,350.,length(p.xy));rgb=mix(vec3(.024,.017,.039),vec3(.065,.045,.09)*(.4+.6*shade),fade);}
  frag=vec4(rgb,alpha);
  }`,
   );
@@ -249,7 +273,7 @@ export function start(
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     uniforms(beautyProgram, angles);
     gl.uniform4f(loc(beautyProgram, "cam"), C.sinA, C.cosA, C.sinE, C.cosE);
-    const viewWidth = canvas.clientWidth < 600 ? 720 : 1200;
+    const viewWidth = (900 * canvas.clientWidth) / canvas.clientHeight;
     gl.uniform2f(loc(beautyProgram, "frameSize"), viewWidth, 900);
     gl.uniform2f(
       loc(beautyProgram, "origin"),

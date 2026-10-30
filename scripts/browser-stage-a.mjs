@@ -33,11 +33,9 @@ try {
     await page.goto(`${url}?pose=${pose}`);
     await page.waitForFunction(() => window.scene?.stats.frames > 0);
     assert.equal(await page.locator("#error").textContent(), "");
-    const png = await page
-      .locator("canvas")
-      .screenshot({
-        path: `${out}/${pose === 0 ? "main-stage-1x" : `pose-${pose}`}.png`,
-      });
+    const png = await page.locator("canvas").screenshot({
+      path: `${out}/${pose === 0 ? "main-stage-1x" : `pose-${pose}`}.png`,
+    });
     images.push(png);
   }
   assert(
@@ -67,6 +65,9 @@ try {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(url);
   await page.waitForFunction(() => window.scene?.stats.frames > 0);
+  const fixedFrames = await page.evaluate(() => scene.stats.frames);
+  await page.waitForTimeout(150);
+  assert.equal(await page.evaluate(() => scene.stats.frames), fixedFrames);
   assert(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -79,6 +80,33 @@ try {
   await page.keyboard.press("Enter");
   await page.waitForURL("**?pose=1");
   await page.waitForFunction(() => window.scene?.stats.frames > 0);
+  assert.equal(
+    await page.locator('[aria-current="page"]').textContent(),
+    "姿态 B",
+  );
+  const responsiveWidths = [390, 600, 601, 768];
+  for (const width of responsiveWidths) {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.waitForTimeout(100);
+    const ratios = await page.locator("canvas").evaluate((canvas) => {
+      const gl = canvas.getContext("webgl2"),
+        program = gl.getParameter(gl.CURRENT_PROGRAM);
+      const frame = gl.getUniform(
+        program,
+        gl.getUniformLocation(program, "frameSize"),
+      );
+      return [frame[0] / frame[1], canvas.clientWidth / canvas.clientHeight];
+    });
+    assert(
+      Math.abs(ratios[0] - ratios[1]) < 0.001,
+      `${width}px: distorted projection`,
+    );
+    assert(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    );
+  }
   assert.deepEqual(errors, []);
   const report = {
     parts: stats.parts,
@@ -91,6 +119,7 @@ try {
     mobileWidth: 390,
     horizontalOverflow: false,
     keyboardNavigation: true,
+    responsiveWidths,
     errors,
   };
   writeFileSync(`${out}/browser.json`, JSON.stringify(report, null, 2));

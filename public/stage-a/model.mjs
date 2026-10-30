@@ -1,7 +1,7 @@
 export const materials = {
   brass: { color: [0.62, 0.32, 0.095], metal: 0.86, rough: 0.27 },
   edge: { color: [0.78, 0.57, 0.29], metal: 0.9, rough: 0.2 },
-  dark: { color: [0.022, 0.014, 0.039], metal: 0.7, rough: 0.36 },
+  dark: { color: [0.022, 0.014, 0.039], metal: 0.15, rough: 0.65 },
   black: { color: [0.014, 0.017, 0.028], metal: 0.45, rough: 0.36 },
   steel: { color: [0.21, 0.19, 0.29], metal: 0.85, rough: 0.24 },
   purple: { color: [0.17, 0.055, 0.29], metal: 0.12, rough: 0.55 },
@@ -604,6 +604,19 @@ export function geometry() {
       6,
       96,
     );
+    tube(
+      id + ".brim.edge",
+      Array.from({ length: 97 }, (_, i) => {
+        const a = (i * TAU) / 96;
+        return [
+          x + scale * 31 * Math.cos(a),
+          y + scale * 31 * Math.sin(a),
+          z + scale * (3.5 + 2 * Math.sin(a * 2)),
+        ];
+      }),
+      0.55 * scale,
+      "purple",
+    );
     mesh(
       id + ".cone",
       (t, a) => {
@@ -696,6 +709,12 @@ export function geometry() {
       });
       quad(q, normals);
     }
+  tube(
+    "Clawd.cloth.hem",
+    Array.from({ length: steps + 1 }, (_, j) => clothPoint(rows, j)),
+    0.55,
+    "purple",
+  );
   begin("Clawd.cloth.crown", "cloth");
   const cap = (t, a) => [
     cx +
