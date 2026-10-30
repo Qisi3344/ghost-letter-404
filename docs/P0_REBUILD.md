@@ -15,3 +15,13 @@
 截图：docs/visual/p0-isometric-stage.png、p0-4x-closeup.png、p0-depth.png、p0-phone.png，以及 p0-triple-rings-poses/ 三姿态均为本轮浏览器截图。p0-before-same-camera.png 为上轮单环样件按当前相机重新截图。
 
 运行 npm run dev 后访问 /ghost-letter-404/p0/index.html，必须带 index.html。独立预览可 python -m http.server 4173 --directory public 后访问 /p0/index.html。
+
+
+## GPU 迭代
+- 运动主体改用原生 WebGL，无新增运行时依赖。底盘与检修件仍为 Anatomy SVG；这是针对运动实体性能的明确实现调整，未照搬 Anatomy 的纯 SVG 实体渲染建议。
+- 三环网格只上传一次，每帧更新三组旋转矩阵；GPU 深度缓冲替代运动部件的中心点 painter 排序。
+- 玻璃球先后绘制背壳与前壳，透明层不写深度，环和内核先写入深度；无真实折射。内部球替换为八面晶体，法线决定反光。
+- 双层渲染共享 Anatomy cameraOf 的同一投影和 viewBox。底盘在全部运动主体下方，其层级由高度净空保证。
+- 浏览器实测 2 秒 122 帧，最近一次 JS 提交 0.1 ms（不代表 GPU 完成时间，也不是手机性能证明）。结果保存在 browser-p0.json。
+- scripts/browser-p0.mjs 检查动画推进、减少动态停止、390px 溢出、SVG 回退及页面错误。运行依赖已有 Playwright，可用 PLAYWRIGHT_PATH 和 CHROME_PATH 指定环境路径。
+- 不再使用前文的 SVG 12.5 Hz 动画路径；SVG 仅作静态回退。暂无手机实体设备帧率数据。
