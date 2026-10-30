@@ -1,28 +1,17 @@
-# P0 空间原型工作记录（未验收）
+# 方案 C：中央量子悬浮
 
-基线：GitHub main `a0c23ee3208a0228df7acbbd7fbd1ec40318f24f`，2026-10-30。Git HTTPS 克隆失败后下载 main 源码归档；本地初始提交是归档快照，不能作为上游历史推送。
+本次用户选择方案 C，优先于 V2 任务书的可见机械支撑要求。
 
-## 已实现
+- 移除左右立柱、外露轴承、连接轴、中央承托件；正常和深度调试视图均不生成这些模型。
+- 保留三条完整厚金属环，环截面包含内外壁和真实倒角。三环共用星核中心和 45°/30° 相机。
+- world() 保留 X/Y/X 旋转轴和父子坐标链；每帧重新投影、着色及世界深度排序。
+- 默认交错旋转；静止观察、三种固定姿态和深度诊断通过页脚链接切换。系统减少动态时静止，离屏和后台不重建几何。
+- 纯 SVG，重建频率上限约 12.5 Hz；未验证手机帧率。后续若不够流畅应迁移网格渲染，不能称为 60 fps。
 
-- 独立预览 `/ghost-letter-404/p0/`，原 React 交互入口及 reducer 未修改。
-- `public/p0/camera.mjs`：Anatomy `fitProjection / iso / depthOf`，45° 方位、30° 仰角，统一世界坐标。
-- `public/p0/stage.mjs`：`cylinder / slabOf / extrude / knurl / segment` 实际调用；四足分层底盘、检修盖与螺钉、双柱支架、轴承连接桥、完整厚环、球形核心。
-- 环半径 127、内径半径 117、厚度 9，96 个空间扇区分别排序，实现球体前后遮挡。
-- `public/p0/vendor/iso-kit.mjs` 原样复制已安装 Anatomy 的对应模块，附原 MIT LICENSE。阅读了 craft、kit、verify 和 test-rig、raptor-engine、turning-dial 示例的相关实现。
+验证：原测试 6/6、生产构建、check-p0 和 check-rings 检查。check-rings 以精确径向包络证明三环与星核的净空对任何刚体姿态成立，且检查三个固定姿态的台面净空。环半径 155/126/98，星核半径 64。没有可见实体 joint 模型，不需要审计支撑接触。
 
-## 实测
+边界：仍未接入 Anatomy recorder/settle；逐面中心深度排序尚不能当作所有角度零冲突证明。玻璃是透射/反射分层近似，无真实折射；P0 美术仍需验收。未修改原游戏状态机或 main。
 
-- `npm ci` 成功，`npm test` 6/6，`npm run build` 成功。
-- `node scripts/check-p0.mjs`：投影高度方向、深度方向、环宽与厚度、SVG 有限值检查通过。
-- Edge 实际浏览器截图：1440×900 主图、4× 支架特写、390×844 减少动画视口；截图工具报告无控制台异常、无横向溢出。
-- 本地 `docs/visual/` 保存 baseline.png、p0-isometric-stage.png、p0-4x-closeup.png、p0-phone.png。基线截图为同宽视口的完整页面，P0 为 SVG 裁切，尚不是严格同构图 A/B。
+截图：docs/visual/p0-isometric-stage.png、p0-4x-closeup.png、p0-depth.png、p0-phone.png，以及 p0-triple-rings-poses/ 三姿态均为本轮浏览器截图。p0-before-same-camera.png 为上轮单环样件按当前相机重新截图。
 
-## 未完成，不能宣称通过验收
-
-- 现阶段仍是空间结构草模：玻璃是投影球轮廓内的材质近似，厚度与透光表现不足；金属曲面分档、环分段接缝仍可见。
-- 当前排序为底座物理层级和上层部件中心深度；未接入 Anatomy recorder/settle 的完整几何遮挡审计，不构成零穿模证明。
-- P0 为静态原型，没有轨道转动验证；本次未重跑原入口完整触屏、键盘、信件导出工作流。
-- 没有实现 P1–P3；按返工说明，P0 通过视觉验收前不得推进剧情、内室或粒子。
-- 不合并 main。此分支只能作为继续细化的草稿，不能当作已达到参考图质量的成品。
-
-启动：`npm run dev`，访问终端显示地址下的 `p0/`。独立检查也可 `python -m http.server 4173 --directory public` 后访问 `http://127.0.0.1:4173/p0/`。
+运行 npm run dev 后访问 /ghost-letter-404/p0/index.html，必须带 index.html。独立预览可 python -m http.server 4173 --directory public 后访问 /p0/index.html。
