@@ -2,6 +2,10 @@
 
 一台可操作的机械宇宙仪，和藏在它里面的幽灵邮局。Vite + React + TypeScript，原创分件 SVG、统一 reducer、Canvas2D 纪念卡；无需账号、后端或模型 API。
 
+**在线体验：https://qisi3344.github.io/ghost-letter-404/**
+
+验收细节和实际限制见 [QA_REPORT.md](docs/QA_REPORT.md)。
+
 ## 本地运行
 Node.js 24（CI 使用），npm 11。
 
