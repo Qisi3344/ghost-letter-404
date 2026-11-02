@@ -1,8 +1,10 @@
 {
-  "parts": 803,
-  "triangles": 363036,
-  "framesIn2Seconds": 121,
-  "submitMs": 0.8000000007450581,
+  "capturedAt": "2026-11-02T14:29:29.291Z",
+  "browserVersion": "156.0.4314.58",
+  "parts": 830,
+  "triangles": 360988,
+  "framesIn2Seconds": 217,
+  "submitMs": 1.2000000029802322,
   "threePoses": true,
   "depthCapture": true,
   "reducedMotion": true,
@@ -23,5 +25,13 @@
     "wrap": true,
     "idleHandoff": true
   },
-  "errors": []
+  "webglFallback": {
+    "nullContext": true,
+    "contextLoss": true,
+    "stopsRendering": true,
+    "keyboardRetry": true,
+    "retry": true
+  },
+  "errors": [],
+  "url": "http://127.0.0.1:4173/stage-a/index.html"
 }

@@ -128,6 +128,21 @@ export function start(
  vec2 uv=(point+ray*t-source).xy/size;
  return (1.-smoothstep(1.-blur,1.+blur,abs(uv.x)))*(1.-smoothstep(1.-blur,1.+blur,abs(uv.y)));
  }
+ // Upright studio cards are essential on near-vertical polished ring faces.
+ float wallCard(vec3 point,vec3 ray,vec3 source,vec2 size,float blur){
+ if(ray.y>-.001)return 0.;float t=(source.y-point.y)/ray.y;if(t<=0.)return 0.;
+ vec2 uv=(point+ray*t-source).xz/size;
+ return (1.-smoothstep(1.-blur,1.+blur,abs(uv.x)))*(1.-smoothstep(1.-blur,1.+blur,abs(uv.y)));
+ }
+ vec3 environment(vec3 point,vec3 ray,float roughness){
+ float blur=.1+roughness*.8;
+ vec3 env=mix(vec3(.018,.013,.025),vec3(.13,.11,.19),smoothstep(-.4,.8,ray.z));
+ env+=vec3(2.7,2.2,1.55)*lightCard(point,ray,vec3(-300.,-600.,520.),vec2(200.,450.),blur);
+ env+=vec3(.6,.68,1.)*lightCard(point,ray,vec3(240.,80.,440.),vec2(30.,240.),blur);
+ env+=vec3(2.8,1.95,1.1)*wallCard(point,ray,vec3(-240.,-430.,260.),vec2(105.,260.),blur);
+ env+=vec3(.5,.58,.9)*wallCard(point,ray,vec3(250.,-390.,220.),vec2(65.,200.),blur);
+ return env;
+ }
  vec3 surface(vec3 N,vec3 R,float key,float shade,float rim){
  vec3 L=normalize(vec3(-180.,160.,500.)-p),H=normalize(L+eye);
  float NoV=max(dot(N,eye),.001),NoL=max(dot(N,L),0.),NoH=max(dot(N,H),0.),VoH=max(dot(eye,H),0.);
@@ -138,11 +153,8 @@ export function start(
  vec3 diffuse=color*(1.-metal)*(.12+key*shade*.7);
  vec3 specular=D*G*F/(4.*NoV*max(NoL,.001));
  vec3 rgb=diffuse+specular*NoL*vec3(1.6,1.3,1.05)*shade;
- float reflection=lightCard(p,R,vec3(-300.,-600.,520.),vec2(200.,450.),.12+rough*.8);
- float strip=lightCard(p,R,vec3(240.,80.,440.),vec2(30.,240.),.1+rough*.6);
- vec3 env=vec3(.14,.10,.18)+vec3(1.8,1.4,.85)*reflection+vec3(.35,.32,.65)*strip;
- env+=vec3(.85,.7,.48)*pow(max(dot(R,normalize(vec3(-.45,-.65,.6))),0.),10.);
- rgb+=env*(F0+(1.-F0)*pow(1.-NoV,5.))*(.15+metal*.85)*(1.-rough*.6);
+ vec3 env=environment(p,R,rough);
+ rgb+=env*(F0+(1.-F0)*pow(1.-NoV,5.))*(.15+metal*.85)*(1.-rough*.85);
  rgb+=color*max(dot(N,normalize(vec3(.7,.5,.3))),0.)*.12*(1.-metal*.6);
  rgb+=vec3(.012,.006,.025)*rim;
  return rgb;
@@ -158,7 +170,7 @@ export function start(
  }
  float facing=max(dot(N,eye),0.),key=max(dot(N,lightDir),0.),shade=visibility(N);
  if(kind==2.){float fade=1.-smoothstep(205.,350.,length(p.xy));frag=vec4(mix(vec3(.024,.017,.039),vec3(.065,.045,.09)*(.4+.6*shade),fade),1.);return;}
- vec3 R=reflect(-eye,N);float softbox=pow(max(dot(R,normalize(vec3(-.6,-.2,1.))),0.),20.)+pow(max(dot(R,normalize(vec3(.8,.1,.7))),0.),55.)*.6;
+ vec3 R=reflect(-eye,N);
  float rim=pow(1.-facing,4.);
  vec3 rgb=surface(N,R,key,shade,rim);
  if(kind==3.){
@@ -169,18 +181,25 @@ export function start(
  float ink=texture(knotMap,clamp(uv,0.,1.)).a*inside*face;
  rgb=mix(rgb,vec3(.027,.042,.107)*(.18+key*shade*.7),ink*.92);
  }
- float grain=sin(local.z*28.+length(local.xy)*17.)*.012;
+ float grainPhase=local.z*28.+length(local.xy)*17.;
+ float grain=sin(grainPhase)*.012*(1.-smoothstep(.5,3.,fwidth(grainPhase)));
  rgb*=1.+metal*grain;
  vec3 toCore=vec3(0.,0.,236.)-p;float distance2=dot(toCore,toCore);rgb+=vec3(.12,.055,.25)*max(dot(N,normalize(toCore)),0.)*1200./(distance2+1200.);
  rgb+=color*emission;
  float alpha=1.;
  if(kind==1.){
- float fresnel=.025+.55*pow(1.-abs(dot(N,eye)),4.);
- rgb=vec3(.055,.025,.11)+softbox*1.6+rim*vec3(.35,.23,.65);
- alpha=clamp(fresnel+softbox*.22,.025,.85);
+ float NoV=abs(dot(N,eye));
+ float fresnel=.04+.96*pow(1.-NoV,5.);
+ // Optical distance through a 1.6-world-unit shell and its empty inner cavity.
+ float impact2=61.*61.*(1.-NoV*NoV);
+ float wall=2.*(61.*NoV-sqrt(max(59.4*59.4-impact2,0.)));
+ vec3 reflected=environment(p,R,.12);
+ rgb=reflected*.7+vec3(.035,.018,.075)+rim*vec3(.18,.16,.3);
+ float card=max(reflected.r,max(reflected.g,reflected.b));
+ alpha=clamp(.018+fresnel*.52+wall*.006+card*fresnel*.14,.025,.82);
  if(gl_FrontFacing){float density=0.;vec3 q=(p-vec3(0.,0.,236.))/61.;float span=max(dot(q,eye),0.)*2.;
  for(int i=0;i<20;i++){vec3 samplePoint=q-eye*span*(float(i)+.5)/20.;density+=nebula(samplePoint)*span/20.;}
- rgb+=vec3(.3,.09,.8)*density*20.;alpha=clamp(alpha+density*3.,.025,.9);}
+ rgb+=vec3(.3,.09,.8)*density*12.;alpha=clamp(alpha+density*1.5,.025,.9);}
  }
  rgb=pow(rgb/(rgb+vec3(.8)),vec3(1./2.2));
  frag=vec4(rgb,alpha);
@@ -304,10 +323,13 @@ export function start(
     gl.disable(gl.CULL_FACE);
     gl.disable(gl.BLEND);
     gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+    gl.enable(gl.POLYGON_OFFSET_FILL);
+    gl.polygonOffset(2, 4);
     gl.viewport(0, 0, 2048, 2048);
     gl.clear(gl.DEPTH_BUFFER_BIT);
     uniforms(depthProgram, angles, dial);
     for (const m of opaque) if (m.name !== "floor") draw(depthProgram, m);
+    gl.disable(gl.POLYGON_OFFSET_FILL);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, width, height);
     gl.clearColor(0.024, 0.017, 0.039, 1);

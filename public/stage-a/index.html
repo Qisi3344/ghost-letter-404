@@ -124,6 +124,37 @@
         color: #dfb4c4;
         text-align: center;
       }
+      [hidden] {
+        display: none !important;
+      }
+      #review {
+        padding: 16px;
+        text-align: center;
+        font: 12px system-ui;
+      }
+      #review button,
+      #error a {
+        min-height: 44px;
+        margin: 4px;
+        padding: 8px 16px;
+      }
+      body.unavailable canvas,
+      body.unavailable #wheel,
+      body.unavailable #controls,
+      body.unavailable nav,
+      body.unavailable #review {
+        display: none;
+      }
+      body.unavailable header {
+        position: static;
+        margin: 36px;
+      }
+      body.unavailable #error {
+        max-width: 520px;
+        margin: 80px auto;
+        padding: 24px;
+        line-height: 1.8;
+      }
       @media (max-width: 600px) {
         header {
           position: relative;
@@ -164,6 +195,7 @@
         aria-valuemin="0"
         aria-valuemax="359"
         aria-valuenow="12"
+        aria-orientation="horizontal"
         aria-describedby="control-hint"
       ></div>
       <section id="controls" aria-label="星轨控制">
@@ -182,6 +214,15 @@
         ><a href="?pose=2">姿态 C</a><a href="?motion=1">缓慢旋转</a
         ><a href="?depth=1">深度检查</a>
       </nav>
+      <section id="review" hidden aria-label="验收截图导出">
+        <p>导出当前浏览器的 4× 原始渲染；局部图只裁切，不放大或修饰。</p>
+        <button type="button" data-export="full">导出全景</button>
+        <button type="button" data-export="core">导出金属与玻璃</button>
+        <button type="button" data-export="glass">导出玻璃星核</button>
+        <button type="button" data-export="console">导出底台与控制盘</button>
+        <button type="button" data-export="clawd">导出 Clawd</button>
+        <button type="button" data-export="gpt">导出 GPT</button>
+      </section>
     </main>
     <script type="module">
       import { start, project } from "./scene.mjs";
@@ -189,7 +230,21 @@
       const canvas = document.querySelector("canvas"),
         params = new URLSearchParams(location.search),
         calm = matchMedia("(prefers-reduced-motion: reduce)");
+      function showUnavailable(error) {
+        document.body.classList.add("unavailable");
+        const status = document.querySelector("#error");
+        status.setAttribute("role", "alert");
+        const message = document.createElement("p");
+        message.textContent =
+          error.message + " 请在支持 WebGL 2 的浏览器中启用硬件加速后重试。";
+        const retry = document.createElement("a");
+        retry.href = location.pathname;
+        retry.textContent = "重新尝试加载舞台";
+        status.replaceChildren(message, retry);
+      }
       try {
+        if (params.get("webgl") === "off")
+          throw Error("此场景需要支持 WebGL 2 的浏览器。");
         const scene = start(canvas, {
           pixelRatio: params.has("capture") ? 4 : undefined,
         });
@@ -197,6 +252,7 @@
         let t = 0,
           last = performance.now(),
           visible = true,
+          failed = false,
           frameId = 0;
         const poseIndex = poses[Number(params.get("pose"))]
             ? Number(params.get("pose"))
@@ -222,6 +278,7 @@
         const value = () =>
           ((Math.round(current()[selected]) % 360) + 360) % 360;
         const draw = () => {
+          if (failed) return;
           scene.render(current(), params.has("depth"), current()[selected]);
           readout.setAttribute("aria-live", manual ? "polite" : "off");
           readout.textContent = names[selected] + " " + value() + "°";
@@ -235,6 +292,7 @@
           wheel.style.top = canvas.offsetTop + p[1] * k + "px";
         };
         const moving = () =>
+          !failed &&
           visible &&
           !document.hidden &&
           params.has("motion") &&
@@ -321,6 +379,53 @@
           }
         });
         draw();
+        if (params.has("capture")) {
+          const review = document.querySelector("#review");
+          review.hidden = false;
+          review.addEventListener("click", async (event) => {
+            const type = event.target.dataset.export;
+            if (!type) return;
+            draw();
+            const k = canvas.clientHeight / 900;
+            const w = (900 * canvas.clientWidth) / canvas.clientHeight;
+            const region = {
+              core: [600, 270, 690, 470],
+              glass: [600, 278, 265, 265],
+              console: [490, 570, 380, 250],
+              clawd: [386, 390, 185, 220],
+              gpt: [885, 425, 175, 235],
+            }[type];
+            const crop = document.createElement("canvas");
+            const [cx, cy, cw, ch] = region || [600, 450, w, 900];
+            const x = region ? (cx - cw / 2 - (1200 - w) / 2) * k : 0;
+            const y = region ? (cy - ch / 2) * k : 0;
+            const dpr = canvas.width / canvas.clientWidth;
+            crop.width = Math.round(cw * k * dpr);
+            crop.height = Math.round(ch * k * dpr);
+            crop
+              .getContext("2d")
+              .drawImage(
+                canvas,
+                Math.round(x * dpr),
+                Math.round(y * dpr),
+                crop.width,
+                crop.height,
+                0,
+                0,
+                crop.width,
+                crop.height,
+              );
+            const blob = await new Promise((resolve) =>
+              crop.toBlob(resolve, "image/png"),
+            );
+            const href = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = href;
+            link.download = `stage-a-${type}-4x.png`;
+            link.click();
+            setTimeout(() => URL.revokeObjectURL(href), 1000);
+          });
+        }
         new ResizeObserver(draw).observe(canvas);
         function frame(now) {
           t += Math.min(0.05, (now - last) / 1000);
@@ -343,9 +448,15 @@
           schedule();
         });
         schedule();
+        canvas.addEventListener("webglcontextlost", (event) => {
+          event.preventDefault();
+          failed = true;
+          cancelAnimationFrame(frameId);
+          showUnavailable(Error("舞台的图形连接已中断。"));
+        });
       } catch (e) {
-        document.querySelector("#error").textContent = e.message;
-        console.error(e);
+        showUnavailable(e);
+        if (params.get("webgl") !== "off") console.error(e);
       }
     </script>
   </body>

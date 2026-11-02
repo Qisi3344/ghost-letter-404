@@ -1,11 +1,12 @@
 import moonModels from "./moontide-models.mjs";
 export const materials = {
-  brass: { color: [0.62, 0.32, 0.095], metal: 0.86, rough: 0.27 },
+  brass: { color: [0.5, 0.255, 0.075], metal: 0.94, rough: 0.24 },
+  bronzeSide: { color: [0.19, 0.085, 0.036], metal: 0.94, rough: 0.29 },
   edge: { color: [0.78, 0.57, 0.29], metal: 0.9, rough: 0.2 },
-  dark: { color: [0.022, 0.014, 0.039], metal: 0.15, rough: 0.65 },
+  dark: { color: [0.017, 0.015, 0.027], metal: 0.55, rough: 0.44 },
   black: { color: [0.014, 0.017, 0.028], metal: 0.45, rough: 0.36 },
   steel: { color: [0.21, 0.19, 0.29], metal: 0.85, rough: 0.24 },
-  purple: { color: [0.17, 0.055, 0.29], metal: 0.12, rough: 0.55 },
+  purple: { color: [0.12, 0.035, 0.2], metal: 0, rough: 0.86 },
   cloth: { color: [0.79, 0.76, 0.8], metal: 0, rough: 0.75 },
   orange: { color: [0.74, 0.25, 0.065], metal: 0.08, rough: 0.49 },
   eye: { color: [0.014, 0.055, 0.12], metal: 0.3, rough: 0.22 },
@@ -134,9 +135,10 @@ export function geometry() {
           }
       }
   }
-  function lathe(id, c, profile, m = "brass", steps = 128, j = 0) {
-    begin(id, m, j);
+  function lathe(id, c, profile, m = "brass", steps = 128, j = 0, finishes) {
+    if (!finishes) begin(id, m, j);
     for (let row = 0; row < profile.length - 1; row++) {
+      if (finishes) begin(row ? `${id}.surface.${row}` : id, finishes[row], j);
       const [z0, r0] = profile[row],
         [z1, r1] = profile[row + 1],
         dz = z1 - z0,
@@ -451,6 +453,9 @@ export function geometry() {
         [-h + 0.8, r + w],
         [h - 0.8, r + w],
         [h, r + w - 0.8],
+        [h, r - w + 2.1],
+        [h - 0.3, r - w + 1.6],
+        [h, r - w + 1.1],
         [h, r - w + 0.8],
         [h - 0.8, r - w],
         [-h + 0.8, r - w],
@@ -459,6 +464,19 @@ export function geometry() {
       "brass",
       256,
       index + 1,
+      [
+        "brass",
+        "edge",
+        "bronzeSide",
+        "edge",
+        "brass",
+        "bronzeSide",
+        "bronzeSide",
+        "brass",
+        "edge",
+        "bronzeSide",
+        "edge",
+      ],
     );
     torus(
       "orbit.outer.trim." + index,
@@ -476,14 +494,6 @@ export function geometry() {
       "edge",
       index + 1,
     );
-    torus(
-      "orbit.machined.groove." + index,
-      [0, 0, h + 0.02],
-      r - w + 1.6,
-      0.22,
-      "black",
-      index + 1,
-    );
     for (let i = 0; i < 120; i++) {
       const a = (i * TAU) / 120,
         span = 0.0018,
@@ -499,7 +509,7 @@ export function geometry() {
     }
   });
   // Glass shell and inner faceted star: both are real depth-tested surfaces.
-  sphere("star.glass", center, [61, 61, 61], "glass", 48);
+  sphere("star.glass", center, [61, 61, 61], "glass", 64);
   begin("star.crystal", "crystal");
   // Six pyramidal points emerge from a small shared core, making a true 3D star.
   for (let axis = 0; axis < 3; axis++)
@@ -640,11 +650,15 @@ export function geometry() {
       id + ".cone",
       (t, a) => {
         const r = 21 * Math.pow(Math.max(0, 1 - t), 0.9),
-          bend = 22 * t * t * t;
+          bend = 22 * t * t * t,
+          tangent = norm([66 * t * t, -8 * t, 54 - 51 * t * t]),
+          u = norm(cross([0, 1, 0], tangent)),
+          v = cross(tangent, u),
+          radial = u.map((x, k) => r * (x * Math.cos(a) + v[k] * Math.sin(a)));
         return [
-          x + scale * (bend + r * Math.cos(a)),
-          y + scale * (r * Math.sin(a) - 4 * t * t),
-          z + scale * (3 + 54 * t - 17 * t * t * t),
+          x + scale * (bend + radial[0]),
+          y + scale * (-4 * t * t + radial[1]),
+          z + scale * (3 + 54 * t - 17 * t * t * t + radial[2]),
         ];
       },
       32,

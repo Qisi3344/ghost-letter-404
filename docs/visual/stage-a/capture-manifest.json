@@ -1,0 +1,122 @@
+{
+  "capturedOn": "2026-11-02 Asia/Shanghai",
+  "startingCommit": "32ecde20121f46340f6bc539fb90b3c08870e41f",
+  "acceptanceRulesRef": "main@36894b698d8582b751578b37ebac39236924892d",
+  "sourceHashNormalization": "UTF-8 text with LF newlines",
+  "sourceSha256": {
+    "public/stage-a/index.html": "adc9b4162e678ad8e7c5f5fb429dff5d1608df786551d36a95c369b703b82dc0",
+    "public/stage-a/scene.mjs": "7b813c074dbdd669015d367fd466cb7d44948971e22eda65946357f6d6b0a087",
+    "public/stage-a/model.mjs": "3efd290cdda56e0054cca2703c741260cf37939b4143aa8370e804cfa959b2ec",
+    "public/stage-a/moontide-models.mjs": "d40a7ebefe8c8b50f737106cc6cbacd783c1ec1fde972181b34dc24b6ae3994f",
+    "public/p0/vendor/iso-kit.mjs": "6d3ecc725d30c3b0346da309cf61dfa5a65017c23620bbd4093009d4fb104018"
+  },
+  "capture4x": {
+    "viewport": [
+      1440,
+      1250
+    ],
+    "canvasCSS": [
+      1425,
+      1069
+    ],
+    "renderBuffer": [
+      5700,
+      4276
+    ],
+    "processing": "1:1 crop of browser framebuffer via canvas drawImage; no resizing, AI or retouching",
+    "note": "The capture toolbar makes the document scroll; the browser scrollbar leaves a 1425 CSS px canvas inside the 1440 px viewport."
+  },
+  "captures": [
+    {
+      "file": "main-stage-1x.png",
+      "width": 1440,
+      "height": 1080,
+      "sha256": "e8d34b5f4873eb96fe8fbaac4f9bcd95a5a13e109b29690069a7a81de13bae89",
+      "source": "Microsoft Edge headless, actual page/canvas screenshot"
+    },
+    {
+      "file": "main-stage-detail-4x.png",
+      "width": 3278,
+      "height": 2233,
+      "sha256": "35768a1146a1f54205abeab8e72c127454dcbbdc1bf6dbd6c2cff1ae3b941e2b",
+      "source": "Codex in-app Chromium browser, ?capture=1, native WebGL canvas export"
+    },
+    {
+      "file": "glass-core-4x.png",
+      "width": 1259,
+      "height": 1259,
+      "sha256": "cf3b5a85241e5247e56924aa6f065b920ab1192ca99224f23fe501c706f25943",
+      "source": "Codex in-app Chromium browser, ?capture=1, native WebGL canvas export"
+    },
+    {
+      "file": "console-4x.png",
+      "width": 1805,
+      "height": 1188,
+      "sha256": "b8d387d0b281fd34f11282240fefbf691f010ef3d48a5aa46aa969af377664f0",
+      "source": "Codex in-app Chromium browser, ?capture=1, native WebGL canvas export"
+    },
+    {
+      "file": "clawd-hat-4x.png",
+      "width": 879,
+      "height": 1045,
+      "sha256": "02b810be5543ee297ab102087be4a843fc70888be186d9fe9a348db5af23aeb9",
+      "source": "Codex in-app Chromium browser, ?capture=1, native WebGL canvas export"
+    },
+    {
+      "file": "gpt-4x.png",
+      "width": 831,
+      "height": 1117,
+      "sha256": "68017345998f62106f2231bf7ae71815342fce59067adf85a8fbb7fe3e81d632",
+      "source": "Codex in-app Chromium browser, ?capture=1, native WebGL canvas export"
+    },
+    {
+      "file": "pose-1.png",
+      "width": 1440,
+      "height": 1080,
+      "sha256": "ea1c14b30cec69c4de31e1c194841f77f8ed4a90943807e870586e8cb0c52aa7",
+      "source": "Microsoft Edge headless, actual page/canvas screenshot"
+    },
+    {
+      "file": "pose-2.png",
+      "width": 1440,
+      "height": 1080,
+      "sha256": "72caea4ea2622aa7c08725f9db79fe7f5662b850012415d8f7a8236d045cc198",
+      "source": "Microsoft Edge headless, actual page/canvas screenshot"
+    },
+    {
+      "file": "main-stage-depth-check.png",
+      "width": 1440,
+      "height": 1080,
+      "sha256": "7bb95efc92fc848f977099f57dcb6f1c44318920b3201812222208af83197fd6",
+      "source": "Microsoft Edge headless, actual page/canvas screenshot"
+    },
+    {
+      "file": "main-stage-mobile.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "36491823e72f3641f277e929a7847822acc79daee799e73d4926746c16a1a3bd",
+      "source": "Microsoft Edge headless, actual page/canvas screenshot"
+    },
+    {
+      "file": "controls-desktop.png",
+      "width": 1440,
+      "height": 1250,
+      "sha256": "4daf10ce2d81bb0aa3bdd743d1f3c4255e09b59787e48815bad201a7ad548dac",
+      "source": "Microsoft Edge headless, actual page/canvas screenshot"
+    },
+    {
+      "file": "webgl-unavailable.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "c522ef6af70369654eb95c1151258b7c0061acbcf8cb4b75971f905d6b091e80",
+      "source": "Microsoft Edge headless, actual page/canvas screenshot"
+    },
+    {
+      "file": "webgl-context-lost.png",
+      "width": 1440,
+      "height": 1250,
+      "sha256": "6a4a57c6a83e9d318fb77989a11d4e8b128a017a29561b20e489aee573bb4ae5",
+      "source": "Microsoft Edge headless, actual page/canvas screenshot"
+    }
+  ]
+}

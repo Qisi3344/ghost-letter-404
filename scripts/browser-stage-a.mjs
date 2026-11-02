@@ -26,7 +26,7 @@ page.on("console", (m) => {
   if (m.type() === "error") errors.push(m.text());
 });
 const url = process.env.STAGE_URL || "http://127.0.0.1:4173/stage-a/index.html",
-  out = "docs/visual/stage-a";
+  out = process.env.STAGE_OUT || "docs/visual/stage-a";
 mkdirSync(out, { recursive: true });
 try {
   const images = [];
@@ -193,7 +193,54 @@ try {
     "manual input must pause the idle tour",
   );
   assert.deepEqual(errors, []);
+  // Exercise the real initialization failure, rather than just opening a demo URL.
+  const fallback = await browser.newPage({
+    viewport: { width: 390, height: 844 },
+  });
+  await fallback.addInitScript(() => {
+    const getContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (type, ...args) {
+      return type === "webgl2" ? null : getContext.call(this, type, ...args);
+    };
+  });
+  await fallback.goto(url);
+  await fallback.locator("#error[role=alert]").waitFor();
+  assert.match(await fallback.locator("#error").textContent(), /WebGL 2/);
+  for (const selector of ["canvas", "#wheel", "#controls", "nav"])
+    assert.equal(await fallback.locator(selector).isVisible(), false);
+  await fallback.keyboard.press("Tab");
+  assert.equal(
+    await fallback.locator(":focus").textContent(),
+    "重新尝试加载舞台",
+  );
+  await fallback.screenshot({ path: `${out}/webgl-unavailable.png` });
+  await fallback.close();
+  const recovery = await browser.newPage({
+    viewport: { width: 1440, height: 1250 },
+  });
+  await recovery.goto(`${url}?webgl=off`);
+  await recovery.getByRole("link", { name: "重新尝试加载舞台" }).click();
+  await recovery.waitForFunction(() => window.scene?.stats.frames > 0);
+  assert.equal(await recovery.locator("#error").textContent(), "");
+  await recovery.evaluate(() => {
+    document
+      .querySelector("canvas")
+      .getContext("webgl2")
+      .getExtension("WEBGL_lose_context")
+      .loseContext();
+  });
+  await recovery.locator("#error[role=alert]").waitFor();
+  assert.match(await recovery.locator("#error").textContent(), /连接已中断/);
+  assert.equal(await recovery.locator("#wheel").isVisible(), false);
+  const lostFrames = await recovery.evaluate(() => scene.stats.frames);
+  await recovery.waitForTimeout(200);
+  assert.equal(await recovery.evaluate(() => scene.stats.frames), lostFrames);
+  await recovery.screenshot({ path: `${out}/webgl-context-lost.png` });
+  await recovery.close();
   const report = {
+    capturedAt: new Date().toISOString(),
+    browserVersion: browser.version(),
+    url,
     parts: stats.parts,
     triangles: stats.triangles,
     framesIn2Seconds: stats.frames - before,
@@ -212,6 +259,13 @@ try {
       reset: true,
       wrap: true,
       idleHandoff: true,
+    },
+    webglFallback: {
+      nullContext: true,
+      contextLoss: true,
+      stopsRendering: true,
+      keyboardRetry: true,
+      retry: true,
     },
     errors,
   };
