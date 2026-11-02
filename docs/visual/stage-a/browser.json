@@ -1,8 +1,8 @@
 {
-  "parts": 825,
-  "triangles": 393436,
+  "parts": 807,
+  "triangles": 368844,
   "framesIn2Seconds": 121,
-  "submitMs": 0.5,
+  "submitMs": 0.4000000001396984,
   "threePoses": true,
   "depthCapture": true,
   "reducedMotion": true,

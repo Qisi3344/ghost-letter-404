@@ -1,3 +1,4 @@
+import moonModels from "./moontide-models.mjs";
 export const materials = {
   brass: { color: [0.62, 0.32, 0.095], metal: 0.86, rough: 0.27 },
   edge: { color: [0.78, 0.57, 0.29], metal: 0.9, rough: 0.2 },
@@ -18,6 +19,24 @@ export const materials = {
   glass: { color: [0.29, 0.22, 0.47], metal: 0.1, rough: 0.12 },
   floor: { color: [0.026, 0.02, 0.041], metal: 0.15, rough: 0.8 },
 };
+materials["moon-orange"] = {
+  color: [0.694, 0.184, 0.095],
+  metal: 0,
+  rough: 0.58,
+};
+materials["moon-eye"] = { color: [0.027, 0.042, 0.107], metal: 0, rough: 0.5 };
+materials["moon-white"] = { color: [0.965, 0.982, 1], metal: 0, rough: 0.75 };
+materials["moon-gpt"] = { color: [0.922, 0.88, 0.823], metal: 0, rough: 0.92 };
+export const gptPlacement = {
+  x: 188,
+  y: -68,
+  z: 125,
+  height: 76,
+  scale: 76 / moonModels.gpt.height,
+  knotCenter: moonModels.gpt.knotCenter,
+  knotWidth: moonModels.gpt.knotWidth,
+};
+export const knotPath = moonModels.knot;
 export const center = [0, 0, 236];
 export const poses = [
   [12, 54, 62],
@@ -388,7 +407,7 @@ export function geometry() {
     44,
     5,
     (114 * Math.PI) / 180,
-    (174 * Math.PI) / 180,
+    (188 * Math.PI) / 180,
     "dark",
   );
   // Central emitter is an inset lens and concentric induction windings, never a support.
@@ -656,118 +675,76 @@ export function geometry() {
       0.3,
     );
   }
-  const cx = -150,
-    cy = 45,
-    z = 49;
-  // Four legs per row. Their feet touch the deck; rear and front rows differ in depth.
-  for (let row = 0; row < 2; row++)
-    for (let i = 0; i < 4; i++) {
-      const x = cx - 21 + i * 14,
-        y = cy + (row ? 13 : -13);
-      box(`Clawd.leg.${row}.${i}`, [x, y, z + 7], [9, 9, 14], "orange", 1.2);
-    }
-  box("Clawd.body", [cx, cy, z + 26], [57, 35, 30], "orange", 3);
-  // Draped cloth is a smooth radial shell with eight scallops, not a screen silhouette.
-  begin("Clawd.cloth", "cloth");
-  const rows = 24,
-    steps = 96;
-  const clothPoint = (i, j) => {
-    const t = i / rows,
-      a = (j * TAU) / steps,
-      rx = 34 + 2 * t,
-      ry = 24 + t,
-      fold = 1 + 0.028 * Math.cos(a * 8) * t;
-    const h = z + 47 - 33 * t + 2.2 * Math.cos(a * 8) * t * t;
-    return [
-      cx +
-        rx *
-          Math.sign(Math.cos(a)) *
-          Math.pow(Math.abs(Math.cos(a)), 0.5) *
-          fold,
-      cy +
-        ry *
-          Math.sign(Math.sin(a)) *
-          Math.pow(Math.abs(Math.sin(a)), 0.5) *
-          fold,
-      h,
-    ];
-  };
-  for (let i = 0; i < rows; i++)
-    for (let j = 0; j < steps; j++) {
-      const ids = [
-          [i, j],
-          [i + 1, j],
-          [i + 1, j + 1],
-          [i, j + 1],
-        ],
-        q = ids.map(([a, b]) => clothPoint(a, b));
-      const normals = ids.map(([i, j]) => {
-        const p = clothPoint(i, j),
-          da = clothPoint(i, j + 0.1).map((x, k) => x - p[k]),
-          dt = clothPoint(i + 0.1, j).map((x, k) => x - p[k]);
-        return norm(cross(dt, da));
-      });
-      quad(q, normals);
-    }
-  tube(
-    "Clawd.cloth.hem",
-    Array.from({ length: steps + 1 }, (_, j) => clothPoint(rows, j)),
-    0.55,
-    "purple",
-  );
-  begin("Clawd.cloth.crown", "cloth");
-  const cap = (t, a) => [
-    cx +
-      34 *
-        Math.sign(Math.cos(a)) *
-        Math.sqrt(Math.abs(Math.cos(a))) *
-        Math.sin(t),
-    cy +
-      24 *
-        Math.sign(Math.sin(a)) *
-        Math.sqrt(Math.abs(Math.sin(a))) *
-        Math.sin(t),
-    z + 47 + 5 * Math.cos(t),
-  ];
-  for (let i = 0; i < 12; i++)
-    for (let j = 0; j < steps; j++) {
-      const ids = [
-          [i, j],
-          [i + 1, j],
-          [i + 1, j + 1],
-          [i, j + 1],
-        ],
-        q = ids.map(([i, j]) => cap((i * Math.PI) / 24, (j * TAU) / steps)),
-        n = ids.map(([i, j]) => {
-          if (i === 0) return [0, 0, 1];
-          const t = (i * Math.PI) / 24,
-            a = (j * TAU) / steps,
-            p = cap(t, a),
-            dt = cap(t + 0.0001, a).map((x, k) => x - p[k]),
-            da = cap(t, a + 0.0001).map((x, k) => x - p[k]);
-          return norm(cross(dt, da));
-        });
-      quad(q, n);
-    }
-  for (const x of [cx - 11, cx + 11]) {
-    box("Clawd.eye", [x, cy + 24.7, z + 34], [5, 2, 13], "eye", 0.45);
-    box(
-      "Clawd.eye.glint",
-      [x - 1, cy + 25.9, z + 38],
-      [1.2, 0.3, 3],
-      "cloth",
-      0.1,
-    );
+  // Original workshop meshes, transformed from Y-up/+Z-front into this scene.
+  const u = [Math.SQRT1_2, -Math.SQRT1_2, 0],
+    f = [Math.SQRT1_2, Math.SQRT1_2, 0];
+  function imported(id, mesh, c, scale, material, legRow = null) {
+    begin(id, material);
+    const index =
+      mesh.index ||
+      Array.from({ length: mesh.position.length / 3 }, (_, i) => i);
+    for (let t = 0; t < index.length; t += 3)
+      for (const offset of [0, 2, 1]) {
+        const i = index[t + offset] * 3,
+          p = mesh.position.slice(i, i + 3),
+          n = mesh.normal.slice(i, i + 3);
+        if (legRow !== null) {
+          p[2] = p[2] * 0.48 + (legRow ? 0.36 : -0.36);
+          n[2] /= 0.48;
+        }
+        if (id.startsWith("Clawd")) {
+          const a = 0.28,
+            cs = Math.cos(a),
+            sn = Math.sin(a);
+          [p[0], p[2]] = [cs * p[0] + sn * p[2], -sn * p[0] + cs * p[2]];
+          [n[0], n[2]] = [cs * n[0] + sn * n[2], -sn * n[0] + cs * n[2]];
+        }
+        const P = [
+          c[0] + scale * (u[0] * p[0] + f[0] * p[2]),
+          c[1] + scale * (u[1] * p[0] + f[1] * p[2]),
+          c[2] + scale * p[1],
+        ];
+        vertex(
+          P,
+          norm([u[0] * n[0] + f[0] * n[2], u[1] * n[0] + f[1] * n[2], n[1]]),
+        );
+      }
   }
-  box("Clawd.arm", [cx + 33, cy + 7, z + 26], [14, 9, 9], "orange", 2);
-  hat("Clawd.hat", cx, cy, z + 50, 0.9);
+  const cx = -162,
+    cy = 30,
+    z = 49;
+  const clawdMin = Math.min(
+      ...moonModels.clawd.flatMap((m) =>
+        m.position.filter((_, i) => i % 3 === 1),
+      ),
+    ),
+    clawdMax = Math.max(
+      ...moonModels.clawd.flatMap((m) =>
+        m.position.filter((_, i) => i % 3 === 1),
+      ),
+    ),
+    cs = 52 / (clawdMax - clawdMin),
+    base = [cx, cy, z - clawdMin * cs];
+  moonModels.clawd.forEach((m, i) => {
+    const material =
+      m.color === 0xd97757
+        ? "moon-orange"
+        : m.color === 0x2e3a5c
+          ? "moon-eye"
+          : "moon-white";
+    if (m.leg >= 0)
+      for (let row = 0; row < 2; row++)
+        imported(`Clawd.leg.${row}.${m.leg}`, m, base, cs, material, row);
+    else imported("Clawd.workshop." + i, m, base, cs, material);
+  });
+  hat("Clawd.hat", cx, cy, z + 51, 0.9);
   const px = cx + 24,
     py = cy + 8,
-    pz = z + 72;
+    pz = z + 73;
   tube(
     "Clawd.pumpkin.cord",
     [
-      [cx + 20, cy - 3, z + 84],
+      [cx + 23, cy - 3, z + 88],
       [px, py, pz + 6],
     ],
     0.35,
@@ -792,60 +769,15 @@ export function geometry() {
       "black",
       0.1,
     );
-  // GPT's tail and cape have volume. The logo is a six-lobed tube on its face.
-  const gx = 174,
-    gy = -55,
-    gz = 158;
-  sphere("GPT.tail", [gx - 4, gy - 2, gz - 23], [11, 10, 22], "cloth");
-  sphere("GPT.body", [gx, gy, gz], [22, 19, 28], "cloth");
-  lathe(
-    "GPT.cape",
-    [gx, gy, gz - 15],
-    [
-      [0, 25],
-      [4, 27],
-      [11, 19],
-    ],
-    "purple",
-    96,
+  const g = gptPlacement;
+  imported(
+    "GPT.workshop.body",
+    moonModels.gpt,
+    [g.x, g.y, g.z],
+    g.scale,
+    "moon-gpt",
   );
-  torus("GPT.cape.hem", [gx, gy, gz - 15], 25, 0.65, "brass");
-  torus("GPT.collar", [gx, gy, gz - 4], 19, 1.4, "purple");
-  sphere("GPT.clasp", [gx + 14, gy + 14, gz - 2], [2.5, 2.5, 3], "brass", 16);
-  sphere("GPT.head", [gx, gy, gz + 18], [24, 22, 23], "cloth");
-  sphere("GPT.hand.left", [gx - 27, gy + 2, gz - 1], [9, 6, 7], "cloth");
-  sphere("GPT.hand.right", [gx + 26, gy + 2, gz + 2], [9, 6, 7], "cloth");
-  // Place the knot in a plane facing the camera, offset from the actual spherical face.
-  const u = [0.707, -0.707, 0],
-    v = [0, 0, 1],
-    front = [0.707, 0.707, 0];
-  for (let l = 0; l < 6; l++) {
-    const path = [
-      [0, -10],
-      [17, -20],
-    ];
-    for (let i = 1; i <= 16; i++) {
-      const t = i / 16;
-      path.push([
-        (1 - t) ** 2 * 17 + 2 * (1 - t) * t * 32 + t * t * 33,
-        (1 - t) ** 2 * -20 + 2 * (1 - t) * t * -23 + t * t * -7,
-      ]);
-    }
-    path.push([33, 5], [15, 16], [5, 10], [5, -4], [18, -12]);
-    const t = (l * TAU) / 6,
-      points = path.map(([px, py], i) => {
-        const x = (px * Math.cos(t) - py * Math.sin(t)) * 0.36,
-          y = -(px * Math.sin(t) + py * Math.cos(t)) * 0.36,
-          depth = 22.4 + (i < 2 ? 0.3 : 0);
-        return [
-          gx + front[0] * depth + u[0] * x,
-          gy + front[1] * depth + u[1] * x,
-          gz + 18 + y,
-        ];
-      });
-    tube("GPT.knot." + l, points, 0.68, "eye");
-  }
-  hat("GPT.hat", gx, gy, gz + 42, 0.7);
+  hat("GPT.hat", g.x, g.y, g.z + g.height - 5, 0.85);
 
   finish();
   return { groups, parts };

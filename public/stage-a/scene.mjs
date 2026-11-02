@@ -1,4 +1,11 @@
-import { geometry, materials, poses, center } from "./model.mjs";
+import {
+  geometry,
+  materials,
+  poses,
+  center,
+  gptPlacement,
+  knotPath,
+} from "./model.mjs";
 import { fitProjection, cameraOf, iso } from "../p0/vendor/iso-kit.mjs";
 export const camera = fitProjection(
   [
@@ -105,7 +112,8 @@ export function start(
     `#version 300 es
  precision highp float;
  in vec3 p,n,local;in vec4 shadow;uniform sampler2D shadowMap;
- uniform vec3 eye,color,lightDir;uniform float metal,rough,emission,kind,debug;
+ uniform vec3 eye,color,lightDir,gptOrigin,gptKnot;uniform float metal,rough,emission,kind,debug,gptScale;
+ uniform sampler2D knotMap;
  out vec4 frag;
  float nebula(vec3 q){
  float r=length(q.xy),a=atan(q.y,q.x);
@@ -152,6 +160,14 @@ export function start(
  vec3 R=reflect(-eye,N);float softbox=pow(max(dot(R,normalize(vec3(-.6,-.2,1.))),0.),20.)+pow(max(dot(R,normalize(vec3(.8,.1,.7))),0.),55.)*.6;
  float rim=pow(1.-facing,4.);
  vec3 rgb=surface(N,R,key,shade,rim);
+ if(kind==3.){
+ vec3 q=(p-gptOrigin)/gptScale;float x=dot(q.xy,vec2(.70710678,-.70710678));
+ vec2 uv=vec2((x-gptKnot.x)/gptKnot.z+.5,1.-((q.z-gptKnot.y)/gptKnot.z+.5));
+ float inside=step(0.,uv.x)*step(uv.x,1.)*step(0.,uv.y)*step(uv.y,1.);
+ float face=smoothstep(.2,.45,dot(N.xy,vec2(.70710678,.70710678)))*step(0.,dot(q.xy,vec2(.70710678,.70710678)));
+ float ink=texture(knotMap,clamp(uv,0.,1.)).a*inside*face;
+ rgb=mix(rgb,vec3(.027,.042,.107)*(.18+key*shade*.7),ink*.92);
+ }
  float grain=sin(local.z*28.+length(local.xy)*17.)*.012;
  rgb*=1.+metal*grain;
  vec3 toCore=vec3(0.,0.,236.)-p;float distance2=dot(toCore,toCore);rgb+=vec3(.12,.055,.25)*max(dot(N,normalize(toCore)),0.)*1200./(distance2+1200.);
@@ -180,6 +196,25 @@ export function start(
     opaque = meshes.filter((m) => m.name !== "glass"),
     glass = meshes.find((m) => m.name === "glass");
   const shadowTexture = gl.createTexture();
+  const knotCanvas = document.createElement("canvas");
+  knotCanvas.width = knotCanvas.height = 512;
+  const ink = knotCanvas.getContext("2d");
+  ink.scale(512 / 24, 512 / 24);
+  ink.fill(new Path2D(knotPath));
+  const knotTexture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, knotTexture);
+  gl.texImage2D(
+    gl.TEXTURE_2D,
+    0,
+    gl.RGBA,
+    gl.RGBA,
+    gl.UNSIGNED_BYTE,
+    knotCanvas,
+  );
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   gl.bindTexture(gl.TEXTURE_2D, shadowTexture);
   gl.texImage2D(
     gl.TEXTURE_2D,
@@ -286,6 +321,21 @@ export function start(
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, shadowTexture);
     gl.uniform1i(loc(beautyProgram, "shadowMap"), 0);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, knotTexture);
+    gl.uniform1i(loc(beautyProgram, "knotMap"), 1);
+    gl.uniform3f(
+      loc(beautyProgram, "gptOrigin"),
+      gptPlacement.x,
+      gptPlacement.y,
+      gptPlacement.z,
+    );
+    gl.uniform1f(loc(beautyProgram, "gptScale"), gptPlacement.scale);
+    gl.uniform3f(
+      loc(beautyProgram, "gptKnot"),
+      ...gptPlacement.knotCenter,
+      gptPlacement.knotWidth,
+    );
     const material = (m) => {
       const a = materials[m.name];
       gl.uniform3fv(loc(beautyProgram, "color"), a.color);
@@ -294,7 +344,13 @@ export function start(
       gl.uniform1f(loc(beautyProgram, "emission"), a.emission || 0);
       gl.uniform1f(
         loc(beautyProgram, "kind"),
-        m.name === "glass" ? 1 : m.name === "floor" ? 2 : 0,
+        m.name === "glass"
+          ? 1
+          : m.name === "floor"
+            ? 2
+            : m.name === "moon-gpt"
+              ? 3
+              : 0,
       );
     };
     for (const m of opaque) {
@@ -321,6 +377,7 @@ export function start(
     dispose() {
       buffers.forEach((b) => gl.deleteBuffer(b));
       gl.deleteTexture(shadowTexture);
+      gl.deleteTexture(knotTexture);
       gl.deleteFramebuffer(framebuffer);
       gl.deleteProgram(beautyProgram);
       gl.deleteProgram(depthProgram);
