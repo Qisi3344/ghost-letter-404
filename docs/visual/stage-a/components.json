@@ -792,12 +792,14 @@
 {"name":"Clawd.hat.buckle","material":"edge","joint":0},
 {"name":"Clawd.hat.buckle.inset","material":"purple","joint":0},
 {"name":"Clawd.star.cord","material":"brass","joint":0},
-{"name":"Clawd.star.pendant","material":"edge","joint":0},
+{"name":"Clawd.star.pendant","material":"gold","joint":0},
 {"name":"GPT.workshop.body","material":"moon-gpt","joint":0},
 {"name":"GPT.hat.brim","material":"purple","joint":0},
 {"name":"GPT.hat.brim.edge","material":"purple","joint":0},
 {"name":"GPT.hat.cone","material":"purple","joint":0},
 {"name":"GPT.hat.band","material":"brass","joint":0},
 {"name":"GPT.hat.buckle","material":"edge","joint":0},
-{"name":"GPT.hat.buckle.inset","material":"purple","joint":0}
+{"name":"GPT.hat.buckle.inset","material":"purple","joint":0},
+{"name":"GPT.moon.cord","material":"brass","joint":0},
+{"name":"GPT.moon.pendant","material":"gold","joint":0}
 ]

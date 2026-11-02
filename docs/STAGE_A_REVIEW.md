@@ -25,7 +25,7 @@
 - 使用 `fitProjection([[-220,-220,0],[220,220,0],[-220,220,0],[220,-220,0],[0,0,400]], 1200, 900, {pad:55, azimuth:45, elevation:30})`，具体投影值可从 `scene.mjs` 的 `camera` 导出读取。
 - 手机逻辑画幅 720 × 900，仅水平裁切空白，视角和几何关系不变。
 - 光源方向归一化 `[-0.5, 0.3, 0.82]`；2048² 阴影贴图；普通显示 DPR 上限 2，`?capture=1` 使用 DPR 4 重渲染。
-- 801 个命名部件、362504 个三角形。完整清单见 [components.json](visual/stage-a/components.json)。部件分组：`altar/foot/deck`、`driver/operator`、`emitter/induction`、`orbit`、`star`、`dock/service`、`Clawd`、`GPT`。
+- 803 个命名部件、363036 个三角形。完整清单见 [components.json](visual/stage-a/components.json)。部件分组：`altar/foot/deck`、`driver/operator`、`emitter/induction`、`orbit`、`star`、`dock/service`、`Clawd`、`GPT`。
 
 ## 真实浏览器截图
 
@@ -72,3 +72,5 @@ npm run build
 阶段 A 的视觉审核通过后，再推进阶段 B；自动检查通过不代替美术验收。
 
 帽饰修正：Clawd 的南瓜替换为实体五角星，绳子从实际弯帽尖沿世界 -Z 方向自然垂落；两顶帽子的厚块帽扣统一改为贴合锥面帽带的薄弧框。局部实截图见 [clawd-hat-4x.png](visual/stage-a/clawd-hat-4x.png)。
+
+Clawd 星星使用明亮金色材质；GPT 帽尖补充同材质月牙吊坠，两条吊绳均按重力竖直下垂。

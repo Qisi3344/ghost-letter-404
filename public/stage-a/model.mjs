@@ -20,6 +20,12 @@ export const materials = {
   floor: { color: [0.026, 0.02, 0.041], metal: 0.15, rough: 0.8 },
 };
 materials["moon-gpt"] = { color: [0.922, 0.88, 0.823], metal: 0, rough: 0.92 };
+materials.gold = {
+  color: [1, 0.58, 0.08],
+  metal: 0.65,
+  rough: 0.22,
+  emission: 0.75,
+};
 export const gptPlacement = {
   x: 188,
   y: -68,
@@ -780,7 +786,7 @@ export function geometry() {
     0.3,
     "brass",
   );
-  begin("Clawd.star.pendant", "edge");
+  begin("Clawd.star.pendant", "gold");
   const front = [Math.SQRT1_2, Math.SQRT1_2, 0],
     side = [Math.SQRT1_2, -Math.SQRT1_2, 0];
   const point = (i, depth) => {
@@ -809,6 +815,52 @@ export function geometry() {
   );
   hat("GPT.hat", g.x, g.y, g.z + g.height - 5, 0.85);
 
+  const mx = g.x + 22 * 0.85,
+    my = g.y - 4 * 0.85,
+    mz = g.z + g.height - 5 + 40 * 0.85;
+  tube(
+    "GPT.moon.cord",
+    [
+      [mx, my, mz],
+      [mx, my, mz - 10],
+    ],
+    0.3,
+    "brass",
+  );
+  begin("GPT.moon.pendant", "gold");
+  const moonPoint = (t, inner, depth) => {
+    const a = Math.PI / 3 + (t * 4 * Math.PI) / 3;
+    const X = inner ? 2.75 - 5.5 * Math.sin(Math.PI * t) : 5.5 * Math.cos(a),
+      Z = inner ? 4.7631397208 * (1 - 2 * t) : 5.5 * Math.sin(a);
+    return [
+      mx + side[0] * X + front[0] * depth,
+      my + side[1] * X + front[1] * depth,
+      mz - 14.7631397208 + Z,
+    ];
+  };
+  for (let i = 0; i < 64; i++) {
+    const a = i / 64,
+      b = (i + 1) / 64;
+    face([
+      moonPoint(a, false, 0.6),
+      moonPoint(a, true, 0.6),
+      moonPoint(b, true, 0.6),
+      moonPoint(b, false, 0.6),
+    ]);
+    face([
+      moonPoint(a, false, -0.6),
+      moonPoint(b, false, -0.6),
+      moonPoint(b, true, -0.6),
+      moonPoint(a, true, -0.6),
+    ]);
+    for (const inner of [false, true])
+      face([
+        moonPoint(a, inner, -0.6),
+        moonPoint(b, inner, -0.6),
+        moonPoint(b, inner, 0.6),
+        moonPoint(a, inner, 0.6),
+      ]);
+  }
   finish();
   return { groups, parts };
 }
