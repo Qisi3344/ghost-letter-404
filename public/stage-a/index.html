@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>404 · 量子祭坛</title>
+    <link rel="icon" href="data:," />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #06040a;
+        color: #c4b2cd;
+        font-family: Georgia, "Songti SC", serif;
+      }
+      main {
+        max-width: 1440px;
+        margin: auto;
+        position: relative;
+      }
+      header {
+        position: absolute;
+        top: 28px;
+        left: 7%;
+        z-index: 1;
+        pointer-events: none;
+      }
+      header small {
+        font: 9px system-ui;
+        letter-spacing: 4px;
+        color: #a88865;
+      }
+      h1 {
+        font-size: 24px;
+        letter-spacing: 5px;
+        font-weight: 400;
+        margin: 14px 0;
+      }
+      canvas {
+        display: block;
+        width: 100%;
+        aspect-ratio: 4/3;
+      }
+      nav {
+        display: flex;
+        justify-content: center;
+        gap: 24px;
+        padding: 14px;
+        font: 11px system-ui;
+        letter-spacing: 1px;
+      }
+      a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        min-width: 44px;
+        color: #ba9d73;
+        text-decoration: none;
+      }
+      a:focus-visible {
+        outline: 2px solid #bba0ee;
+      }
+      a[aria-current="page"] {
+        color: #e9c997;
+        text-decoration: underline;
+        text-underline-offset: 5px;
+      }
+      #error {
+        color: #dfb4c4;
+        text-align: center;
+      }
+      @media (max-width: 600px) {
+        header {
+          position: relative;
+          top: auto;
+          left: auto;
+          margin: 22px 28px 0;
+        }
+        h1 {
+          font-size: 17px;
+        }
+        header small {
+          font-size: 7px;
+        }
+        canvas {
+          aspect-ratio: 4/5;
+        }
+        nav {
+          gap: 10px;
+          font-size: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <small>THE GHOST IN THE QUANTUM MACHINE</small>
+        <h1>404 · 星光约束场</h1>
+      </header>
+      <canvas
+        aria-label="三重金属星轨围绕玻璃星核悬浮，Clawd 与 GPT 在量子祭坛旁协作"
+      ></canvas>
+      <p id="error" role="status"></p>
+      <nav>
+        <a href="?pose=0">静态 A</a><a href="?pose=1">姿态 B</a
+        ><a href="?pose=2">姿态 C</a><a href="?motion=1">缓慢旋转</a
+        ><a href="?depth=1">深度检查</a>
+      </nav>
+    </main>
+    <script type="module">
+      import { start } from "./scene.mjs";
+      import { poses } from "./model.mjs";
+      const canvas = document.querySelector("canvas"),
+        params = new URLSearchParams(location.search),
+        calm = matchMedia("(prefers-reduced-motion: reduce)");
+      try {
+        const scene = start(canvas, {
+          pixelRatio: params.has("capture") ? 4 : undefined,
+        });
+        window.scene = scene;
+        let t = 0,
+          last = performance.now(),
+          visible = true,
+          frameId = 0;
+        const poseIndex = poses[Number(params.get("pose"))]
+            ? Number(params.get("pose"))
+            : 0,
+          fixed = poses[poseIndex];
+        document
+          .querySelectorAll("nav a")
+          [
+            params.has("depth") ? 4 : params.has("motion") ? 3 : poseIndex
+          ].setAttribute("aria-current", "page");
+        const draw = () =>
+          scene.render(
+            params.has("motion") && !calm.matches
+              ? [12 + 8 * Math.sin(t * 0.1), 54 + t * 2, 62 - t * 3]
+              : fixed,
+            params.has("depth"),
+          );
+        draw();
+        new ResizeObserver(draw).observe(canvas);
+        const moving = () =>
+          visible && !document.hidden && params.has("motion") && !calm.matches;
+        function frame(now) {
+          t += Math.min(0.05, (now - last) / 1000);
+          draw();
+          last = now;
+          if (moving()) frameId = requestAnimationFrame(frame);
+        }
+        function schedule() {
+          cancelAnimationFrame(frameId);
+          last = performance.now();
+          if (moving()) frameId = requestAnimationFrame(frame);
+        }
+        new IntersectionObserver((e) => {
+          visible = e[0].isIntersecting;
+          schedule();
+        }).observe(canvas);
+        document.addEventListener("visibilitychange", schedule);
+        calm.addEventListener("change", () => {
+          draw();
+          schedule();
+        });
+        schedule();
+      } catch (e) {
+        document.querySelector("#error").textContent = e.message;
+        console.error(e);
+      }
+    </script>
+  </body>
+</html>

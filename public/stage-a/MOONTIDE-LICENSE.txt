@@ -1,0 +1,24 @@
+月汐小岛 · moontide-isle
+Copyright (c) 2026 绮思 (Qisi3344)
+All Rights Reserved. 版权所有，未经书面许可不得使用。
+
+本项目（除 vendor/ 目录外）的全部内容，包括但不限于源代码、画面、文案，
+版权归作者所有。本项目不向公众授予任何使用许可。未经作者事先书面许可，
+任何人不得：
+
+- 将本项目或其任何部分用于商业用途；
+- 修改、改编、翻译或以其他方式演绎本项目（二改 / 二创），
+  也不得公开发布演绎后的作品；
+- 复制、分发、转载本项目的源代码与素材，
+  或将其拿走用于其他项目。
+
+未经许可的使用均构成侵权，作者保留追究的权利。
+
+This project (excluding vendor/) is All Rights Reserved. No license is
+granted to the public. Without the author's prior written permission, no
+part of this project — including its source code, artwork and text — may
+be used commercially, modified or adapted, or copied / redistributed /
+taken for use in other projects.
+
+vendor/three.min.js 与 vendor/OrbitControls.js 来自 three.js
+（MIT License, Copyright 2010-2022 Three.js Authors），按其原许可使用。

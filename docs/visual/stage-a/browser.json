@@ -1,0 +1,19 @@
+{
+  "parts": 809,
+  "triangles": 370304,
+  "framesIn2Seconds": 120,
+  "submitMs": 0.19999999972060323,
+  "threePoses": true,
+  "depthCapture": true,
+  "reducedMotion": true,
+  "mobileWidth": 390,
+  "horizontalOverflow": false,
+  "keyboardNavigation": true,
+  "responsiveWidths": [
+    390,
+    600,
+    601,
+    768
+  ],
+  "errors": []
+}
