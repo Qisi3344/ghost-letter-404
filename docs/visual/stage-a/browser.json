@@ -1,10 +1,11 @@
 {
-  "capturedAt": "2026-11-02T14:29:29.291Z",
+  "capturedAt": "2026-11-02T14:56:08.389Z",
   "browserVersion": "156.0.4314.58",
+  "url": "http://127.0.0.1:4173/stage-a/index.html",
   "parts": 830,
   "triangles": 360988,
-  "framesIn2Seconds": 217,
-  "submitMs": 1.2000000029802322,
+  "framesIn2Seconds": 230,
+  "submitMs": 1.7999999970197678,
   "threePoses": true,
   "depthCapture": true,
   "reducedMotion": true,
@@ -32,6 +33,5 @@
     "keyboardRetry": true,
     "retry": true
   },
-  "errors": [],
-  "url": "http://127.0.0.1:4173/stage-a/index.html"
+  "errors": []
 }

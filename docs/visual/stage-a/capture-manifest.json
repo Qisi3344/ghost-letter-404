@@ -4,9 +4,9 @@
   "acceptanceRulesRef": "main@36894b698d8582b751578b37ebac39236924892d",
   "sourceHashNormalization": "UTF-8 text with LF newlines",
   "sourceSha256": {
-    "public/stage-a/index.html": "adc9b4162e678ad8e7c5f5fb429dff5d1608df786551d36a95c369b703b82dc0",
-    "public/stage-a/scene.mjs": "7b813c074dbdd669015d367fd466cb7d44948971e22eda65946357f6d6b0a087",
-    "public/stage-a/model.mjs": "3efd290cdda56e0054cca2703c741260cf37939b4143aa8370e804cfa959b2ec",
+    "public/stage-a/index.html": "29e4f450e0b2049eed1daa0dd6253e5b5b4c38ca41dfa4fa9fed6d8445ecd66b",
+    "public/stage-a/scene.mjs": "3f37017e89d5b234c1e38d486a23df97b1b4af7f5246729d760f34af67b548d8",
+    "public/stage-a/model.mjs": "3ad9d384d6eb20820405eea555572b118bf94f8d25053ff2d5ede16e56cb7802",
     "public/stage-a/moontide-models.mjs": "d40a7ebefe8c8b50f737106cc6cbacd783c1ec1fde972181b34dc24b6ae3994f",
     "public/p0/vendor/iso-kit.mjs": "6d3ecc725d30c3b0346da309cf61dfa5a65017c23620bbd4093009d4fb104018"
   },
@@ -31,35 +31,35 @@
       "file": "main-stage-1x.png",
       "width": 1440,
       "height": 1080,
-      "sha256": "e8d34b5f4873eb96fe8fbaac4f9bcd95a5a13e109b29690069a7a81de13bae89",
+      "sha256": "6bf5f3044745399e1e3e85cdc875c7175cdaca6e0d861b0d583099754dacac0f",
       "source": "Microsoft Edge headless, actual page/canvas screenshot"
     },
     {
       "file": "main-stage-detail-4x.png",
       "width": 3278,
       "height": 2233,
-      "sha256": "35768a1146a1f54205abeab8e72c127454dcbbdc1bf6dbd6c2cff1ae3b941e2b",
+      "sha256": "ea0206dfff1f7c20bc046931819abce05128ffb07bfd02691f80c8af2d69ec5f",
       "source": "Codex in-app Chromium browser, ?capture=1, native WebGL canvas export"
     },
     {
       "file": "glass-core-4x.png",
       "width": 1259,
       "height": 1259,
-      "sha256": "cf3b5a85241e5247e56924aa6f065b920ab1192ca99224f23fe501c706f25943",
+      "sha256": "7d5289b560bac929aefa23aa2c2ef7449486447194c6a89e1496f9bd3391c7ed",
       "source": "Codex in-app Chromium browser, ?capture=1, native WebGL canvas export"
     },
     {
       "file": "console-4x.png",
-      "width": 1805,
-      "height": 1188,
-      "sha256": "b8d387d0b281fd34f11282240fefbf691f010ef3d48a5aa46aa969af377664f0",
+      "width": 3326,
+      "height": 1710,
+      "sha256": "58d1d6de23b7144758c57ff6fbf29fedea35117ba79c386091a8f18d54286b13",
       "source": "Codex in-app Chromium browser, ?capture=1, native WebGL canvas export"
     },
     {
       "file": "clawd-hat-4x.png",
       "width": 879,
       "height": 1045,
-      "sha256": "02b810be5543ee297ab102087be4a843fc70888be186d9fe9a348db5af23aeb9",
+      "sha256": "34906683bba57d18722db409a6eaf2a3ab7e1ebd1992862a8b1cadf9cfc50392",
       "source": "Codex in-app Chromium browser, ?capture=1, native WebGL canvas export"
     },
     {
@@ -73,35 +73,35 @@
       "file": "pose-1.png",
       "width": 1440,
       "height": 1080,
-      "sha256": "ea1c14b30cec69c4de31e1c194841f77f8ed4a90943807e870586e8cb0c52aa7",
+      "sha256": "e5678561823d2496cfeb4d8b67d5afd95ee3dd24ad9baef9462b5839be9769f7",
       "source": "Microsoft Edge headless, actual page/canvas screenshot"
     },
     {
       "file": "pose-2.png",
       "width": 1440,
       "height": 1080,
-      "sha256": "72caea4ea2622aa7c08725f9db79fe7f5662b850012415d8f7a8236d045cc198",
+      "sha256": "630fa2fce00471ffa8f4695b7a5ddd2533129ed6aa756613f339b314e132ed58",
       "source": "Microsoft Edge headless, actual page/canvas screenshot"
     },
     {
       "file": "main-stage-depth-check.png",
       "width": 1440,
       "height": 1080,
-      "sha256": "7bb95efc92fc848f977099f57dcb6f1c44318920b3201812222208af83197fd6",
+      "sha256": "e89fcd055b9722be4d027a2bf9ce55db3d74df29bb9127f5d290e3ca7e58b317",
       "source": "Microsoft Edge headless, actual page/canvas screenshot"
     },
     {
       "file": "main-stage-mobile.png",
       "width": 390,
       "height": 844,
-      "sha256": "36491823e72f3641f277e929a7847822acc79daee799e73d4926746c16a1a3bd",
+      "sha256": "f5d7f82750509c337ae8800191a6d806dbbb34209d8785624396a0733c5a8490",
       "source": "Microsoft Edge headless, actual page/canvas screenshot"
     },
     {
       "file": "controls-desktop.png",
       "width": 1440,
       "height": 1250,
-      "sha256": "4daf10ce2d81bb0aa3bdd743d1f3c4255e09b59787e48815bad201a7ad548dac",
+      "sha256": "a3627852d101dfe5da165a1901720d8666cbddcebb21c91ebfea52a73a19c0ac",
       "source": "Microsoft Edge headless, actual page/canvas screenshot"
     },
     {
@@ -117,6 +117,45 @@
       "height": 1250,
       "sha256": "6a4a57c6a83e9d318fb77989a11d4e8b128a017a29561b20e489aee573bb4ae5",
       "source": "Microsoft Edge headless, actual page/canvas screenshot"
+    }
+  ],
+  "layoutRevisionBase": "a108c56cff5e9cfacbcf49bc9c292c78ef197a92",
+  "deviceMounts": [
+    {
+      "source": [
+        -75,
+        103
+      ],
+      "degrees": 145,
+      "angle": 2.5307274153917776,
+      "position": [
+        -104.37038614173298,
+        73.08093114229972
+      ]
+    },
+    {
+      "source": [
+        104,
+        75
+      ],
+      "degrees": 25,
+      "angle": 0.4363323129985824,
+      "position": [
+        116.20901662705951,
+        54.18915439985942
+      ]
+    },
+    {
+      "source": [
+        -110,
+        -74
+      ],
+      "degrees": 205,
+      "angle": 3.5779249665883754,
+      "position": [
+        -120.15330837694528,
+        -56.0284078488287
+      ]
     }
   ]
 }

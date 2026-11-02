@@ -5,6 +5,7 @@ import {
   center,
   gptPlacement,
   knotPath,
+  dialOrigin,
 } from "./model.mjs";
 import { fitProjection, cameraOf, iso } from "../p0/vendor/iso-kit.mjs";
 export const camera = fitProjection(
@@ -65,10 +66,10 @@ export function start(
     lv = cross(light, lu);
   const shared = `
  precision highp float;
- uniform mat3 turns[3];uniform vec3 center;uniform vec2 dialTurn;
+ uniform mat3 turns[3];uniform vec3 center,dialOrigin;uniform vec2 dialTurn;
  vec3 dialRotate(vec3 p){return vec3(p.x*dialTurn.x-p.y*dialTurn.y,p.x*dialTurn.y+p.y*dialTurn.x,p.z);}
  in vec3 position;in vec3 normal;in float joint;
- vec3 worldPoint(){if(joint>3.5)return dialRotate(position-vec3(-75.,103.,74.))+vec3(-75.,103.,74.);if(joint<.5)return position;return turns[int(joint)-1]*position+center;}
+ vec3 worldPoint(){if(joint>3.5)return dialRotate(position-dialOrigin)+dialOrigin;if(joint<.5)return position;return turns[int(joint)-1]*position+center;}
  vec3 worldNormal(){if(joint>3.5)return dialRotate(normal);if(joint<.5)return normal;return turns[int(joint)-1]*normal;}
  uniform vec3 lightU,lightV,lightDir;
  vec4 shadowPosition(vec3 p){p-=vec3(0.,0.,130.);return vec4(dot(p,lightU)/420.,dot(p,lightV)/420.,-dot(p,lightDir)/600.,1.);}
@@ -279,6 +280,7 @@ export function start(
       Math.sin((dial * Math.PI) / 180 - Math.atan2(4, 10)),
     );
     gl.uniform3fv(loc(p, "center"), center);
+    gl.uniform3fv(loc(p, "dialOrigin"), dialOrigin);
     gl.uniform3fv(loc(p, "lightDir"), light);
     gl.uniform3fv(loc(p, "lightU"), lu);
     gl.uniform3fv(loc(p, "lightV"), lv);

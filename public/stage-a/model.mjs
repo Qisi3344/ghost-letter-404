@@ -38,6 +38,26 @@ export const gptPlacement = {
 };
 export const knotPath = moonModels.knot;
 export const center = [0, 0, 236];
+// The gold T-grooves and their deck sectors share the 8°..42° interval,
+// repeated every 60°. Mount each local X axis on its sector bisector.
+export const deckLayout = { start: 8, span: 34, step: 60 };
+export const deviceMounts = [
+  { source: [-75, 103], sector: 2 },
+  { source: [104, 75], sector: 0 },
+  { source: [-110, -74], sector: 3 },
+].map(({ source, sector }) => {
+  const degrees =
+    deckLayout.start + deckLayout.span / 2 + sector * deckLayout.step;
+  const angle = (degrees * Math.PI) / 180;
+  const radius = Math.hypot(...source);
+  return {
+    source,
+    degrees,
+    angle,
+    position: [radius * Math.cos(angle), radius * Math.sin(angle)],
+  };
+});
+export const dialOrigin = [...deviceMounts[0].position, 74];
 export const poses = [
   [12, 54, 62],
   [-18, 82, 38],
@@ -65,6 +85,7 @@ export function geometry() {
   parts.length = 0;
   let mat = "brass",
     joint = 0,
+    mount = null,
     active;
   const names = new Map();
   const finish = () => {
@@ -87,7 +108,21 @@ export function geometry() {
     };
     parts.push(active);
   };
-  const vertex = (p, n) => groups.get(mat).push(...p, ...n, joint);
+  const vertex = (p, n) => {
+    if (mount) {
+      const c = Math.cos(mount.angle),
+        s = Math.sin(mount.angle);
+      const x = p[0] - mount.source[0],
+        y = p[1] - mount.source[1];
+      p = [
+        mount.position[0] + c * x - s * y,
+        mount.position[1] + s * x + c * y,
+        p[2],
+      ];
+      n = [c * n[0] - s * n[1], s * n[0] + c * n[1], n[2]];
+    }
+    groups.get(mat).push(...p, ...n, joint);
+  };
   const quad = (p, n) => {
     for (const i of [0, 1, 2, 0, 2, 3]) vertex(p[i], n[i]);
   };
@@ -362,8 +397,8 @@ export function geometry() {
   }
   // Six radial driver bays: the gaps expose insulated copper windings below the deck.
   for (let i = 0; i < 6; i++) {
-    const a = ((i * 60 + 8) * Math.PI) / 180,
-      b = a + (34 * Math.PI) / 180;
+    const a = ((i * deckLayout.step + deckLayout.start) * Math.PI) / 180,
+      b = a + (deckLayout.span * Math.PI) / 180;
     sector("driver.deck." + i, 71, 176, 44, 5, a, b, "dark");
     sector(
       "driver.deck.trim." + i,
@@ -539,6 +574,7 @@ export function geometry() {
   sphere("star.heart", center, [8, 8, 12], "light", 20);
   torus("star.inner.equator", center, 39, 0.45, "light");
   // Control dock on the front-left rim; service access and a usable hand wheel.
+  mount = deviceMounts[0];
   box("dock.body", [-75, 103, 58], [62, 47, 18], "dark", 4);
   box("dock.face", [-75, 103, 68], [55, 40, 3], "brass", 1);
   disc("dock.dial", [-75, 103, 70], 17, 3, "black");
@@ -576,11 +612,11 @@ export function geometry() {
       i === 1 ? "light" : "black",
     );
   }
-  // Recessed power-service covers, with vents bounded by their panel frames.
-  for (const c of [
-    [104, 75],
-    [-110, -74],
-  ]) {
+  mount = null;
+  // Transform the entire assembly, including inset, louvres and fasteners.
+  for (const placement of deviceMounts.slice(1)) {
+    mount = placement;
+    const c = placement.source;
     box("service.frame", [...c, 51], [36, 29, 3], "brass", 2);
     box("service.inset", [...c, 53], [32, 25, 2], "black", 1);
     for (let i = -3; i <= 3; i++)
@@ -595,6 +631,7 @@ export function geometry() {
       for (const dy of [-10, 10])
         screw("service.screw", c[0] + dx, c[1] + dy, 54, 1);
   }
+  mount = null;
   // Characters are meshes in this same world, sharing lighting and shadows.
   function hat(id, x, y, z, scale = 1) {
     // A curled fabric cone and warped brim, sampled as continuous surfaces.

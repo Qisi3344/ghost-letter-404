@@ -226,7 +226,7 @@
     </main>
     <script type="module">
       import { start, project } from "./scene.mjs";
-      import { poses } from "./model.mjs";
+      import { poses, dialOrigin } from "./model.mjs";
       const canvas = document.querySelector("canvas"),
         params = new URLSearchParams(location.search),
         calm = matchMedia("(prefers-reduced-motion: reduce)");
@@ -284,7 +284,7 @@
           readout.textContent = names[selected] + " " + value() + "°";
           wheel.setAttribute("aria-valuenow", value());
           wheel.setAttribute("aria-valuetext", readout.textContent);
-          const p = project([-75, 103, 74]),
+          const p = project(dialOrigin),
             w = (900 * canvas.clientWidth) / canvas.clientHeight,
             k = canvas.clientHeight / 900;
           wheel.style.left =
@@ -391,7 +391,7 @@
             const region = {
               core: [600, 270, 690, 470],
               glass: [600, 278, 265, 265],
-              console: [490, 570, 380, 250],
+              console: [600, 570, 700, 360],
               clawd: [386, 390, 185, 220],
               gpt: [885, 425, 175, 235],
             }[type];
