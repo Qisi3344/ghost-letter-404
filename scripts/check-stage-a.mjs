@@ -87,6 +87,19 @@ for (const part of parts) {
   );
 }
 assert.equal(parts.filter((p) => /^Clawd\.leg\./.test(p.name)).length, 8);
+const cord = parts.find((p) => p.name === "Clawd.star.cord");
+assert(cord && parts.some((p) => p.name === "Clawd.star.pendant"));
+const cordData = groups
+  .get(cord.material)
+  .slice(cord.start * 7, (cord.start + cord.count) * 7);
+for (const axis of [0, 1]) {
+  const values = cordData.filter((_, i) => i % 7 === axis);
+  assert(
+    Math.max(...values) - Math.min(...values) < 0.8,
+    "pendant cord must hang vertically in world space",
+  );
+}
+assert(!parts.some((p) => p.name.startsWith("Clawd.pumpkin.")));
 assert.equal(new Set(parts.map((p) => p.name)).size, parts.length);
 const gaps = [
   shells[0].min - shells[1].max,

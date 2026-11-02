@@ -653,20 +653,56 @@ export function geometry() {
       "brass",
       96,
     );
-    box(
-      id + ".buckle",
-      [x + 12 * scale, y + 14 * scale, z + 9 * scale],
-      [8 * scale, 3 * scale, 6 * scale],
-      "edge",
-      0.7,
-    );
-    box(
-      id + ".buckle.inset",
-      [x + 12 * scale, y + 15.6 * scale, z + 9 * scale],
-      [4.5 * scale, 0.3 * scale, 3 * scale],
-      "purple",
-      0.3,
-    );
+    // A thin curved frame follows the conical hatband instead of a protruding box.
+    const bucklePoint = (u, v, offset = 0.3) => {
+      const a = Math.PI / 4 + u / 19,
+        h = 8 + v,
+        r = 20.7 - ((h - 5) * 2.5) / 6 + offset;
+      return [
+        x + scale * r * Math.cos(a),
+        y + scale * r * Math.sin(a),
+        z + scale * h,
+      ];
+    };
+    const outline = [];
+    for (const [a, b] of [
+      [
+        [-3.2, -2],
+        [3.2, -2],
+      ],
+      [
+        [3.2, -2],
+        [3.2, 2],
+      ],
+      [
+        [3.2, 2],
+        [-3.2, 2],
+      ],
+      [
+        [-3.2, 2],
+        [-3.2, -2],
+      ],
+    ])
+      for (let i = 0; i < 8; i++)
+        outline.push(
+          bucklePoint(
+            a[0] + ((b[0] - a[0]) * i) / 8,
+            a[1] + ((b[1] - a[1]) * i) / 8,
+          ),
+        );
+    outline.push(outline[0]);
+    tube(id + ".buckle", outline, 0.32 * scale, "edge");
+    begin(id + ".buckle.inset", "purple");
+    for (let i = 0; i < 12; i++) {
+      const u = -2.8 + (5.6 * i) / 12,
+        v = -2.8 + (5.6 * (i + 1)) / 12;
+      face([
+        bucklePoint(u, -1.6, 0.1),
+        bucklePoint(v, -1.6, 0.1),
+        bucklePoint(v, 1.6, 0.1),
+        bucklePoint(u, 1.6, 0.1),
+      ]);
+    }
   }
   // Original workshop meshes, transformed from Y-up/+Z-front into this scene.
   const u = [Math.SQRT1_2, -Math.SQRT1_2, 0],
@@ -728,37 +764,41 @@ export function geometry() {
     else imported("Clawd.lab." + i, m, base, cs, material);
   });
   hat("Clawd.hat", cx, cy, z + 51, 0.9);
-  const px = cx + 24,
-    py = cy + 8,
-    pz = z + 73;
+  // The chain hangs in world -Z directly beneath the actual curled cone tip.
+  const ax = cx + 22 * 0.9,
+    ay = cy - 4 * 0.9,
+    az = z + 51 + 40 * 0.9;
+  const radius = 5.5,
+    starZ = az - 16.5,
+    starTop = starZ + radius;
   tube(
-    "Clawd.pumpkin.cord",
+    "Clawd.star.cord",
     [
-      [cx + 23, cy - 3, z + 88],
-      [px, py, pz + 6],
+      [ax, ay, az],
+      [ax, ay, starTop],
     ],
-    0.35,
+    0.3,
     "brass",
   );
-  for (let i = 0; i < 6; i++) {
-    const a = (i * TAU) / 6;
-    sphere(
-      "Clawd.pumpkin.lobe." + i,
-      [px + 2 * Math.cos(a), py + 2 * Math.sin(a), pz],
-      [3.5, 3.5, 5],
-      "orange",
-      16,
-    );
+  begin("Clawd.star.pendant", "edge");
+  const front = [Math.SQRT1_2, Math.SQRT1_2, 0],
+    side = [Math.SQRT1_2, -Math.SQRT1_2, 0];
+  const point = (i, depth) => {
+    const a = Math.PI / 2 + (i * TAU) / 10,
+      r = i % 2 ? radius * 0.46 : radius;
+    return [
+      ax + side[0] * r * Math.cos(a) + front[0] * depth,
+      ay + side[1] * r * Math.cos(a) + front[1] * depth,
+      starZ + r * Math.sin(a),
+    ];
+  };
+  const mid = (depth) => [ax + front[0] * depth, ay + front[1] * depth, starZ];
+  for (let i = 0; i < 10; i++) {
+    const j = (i + 1) % 10;
+    face([mid(0.65), point(j, 0.65), point(i, 0.65)]);
+    face([mid(-0.65), point(i, -0.65), point(j, -0.65)]);
+    face([point(i, -0.65), point(j, -0.65), point(j, 0.65), point(i, 0.65)]);
   }
-  box("Clawd.pumpkin.stem", [px, py, pz + 5], [1.6, 1.6, 3], "brass", 0.4);
-  for (const dx of [-1.7, 1.7])
-    box(
-      "Clawd.pumpkin.eye",
-      [px + dx, py + 5, pz + 1],
-      [1.2, 0.3, 1.5],
-      "black",
-      0.1,
-    );
   const g = gptPlacement;
   imported(
     "GPT.workshop.body",
