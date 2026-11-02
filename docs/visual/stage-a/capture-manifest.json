@@ -157,5 +157,7 @@
         -56.0284078488287
       ]
     }
-  ]
+  ],
+  "sourceSnapshotCommit": "b7a5dba458a479d67cf5a25184cef131e1f2795f",
+  "snapshotNote": "Historical independent Stage A images and LF source hashes at sourceSnapshotCommit; React integration evidence is in ../integration/."
 }

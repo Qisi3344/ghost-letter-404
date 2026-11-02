@@ -2,7 +2,7 @@
 
 更新：2026-11-02（Asia/Shanghai）。分支：`codex/visual-stage-a`；PR：[#2](https://github.com/Qisi3344/ghost-letter-404/pull/2)。
 
-**状态：等待用户视觉审核，未判定通过。** 本轮完成主舞台复核、针对性修正和浏览器取证。Stage B 内室及 Stage C 整合均未启动，PR 保持草稿，不合并或修改 main。
+**本页为独立静态舞台的历史验收记录，图像与源码散列对应提交 b7a5dba，未自行判定美术通过。** 用户随后明确要求将主舞台接入现有游戏；当前整合结果、截图与验证见 [INTEGRATION_REVIEW.md](INTEGRATION_REVIEW.md)。新内室建模未启动，PR 保持草稿，不合并或修改 main。
 
 开始时开发分支缺少两份约束文件，已只读核对 [AGENTS.md](https://github.com/Qisi3344/ghost-letter-404/blob/36894b698d8582b751578b37ebac39236924892d/AGENTS.md) 和 [VISUAL_ACCEPTANCE.md](https://github.com/Qisi3344/ghost-letter-404/blob/36894b698d8582b751578b37ebac39236924892d/docs/VISUAL_ACCEPTANCE.md)，没有通过合并 main 引入其他开发内容。
 

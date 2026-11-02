@@ -1,0 +1,83 @@
+.webgl-stage {
+  position: relative;
+  width: 100%;
+  background: #06040a;
+  isolation: isolate;
+}
+.stage-canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+}
+.stage-canvas[hidden] {
+  display: none;
+}
+.stage-hit {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 50%;
+  cursor: ew-resize;
+  touch-action: none;
+  padding: 0;
+  z-index: 1;
+}
+.stage-hit:hover,
+.stage-hit:focus-visible {
+  border-color: #d9b77c;
+  outline: 2px solid #d9b77c88;
+  background: #d9b77c12;
+}
+.stage-dial {
+  width: 6%;
+  aspect-ratio: 1;
+}
+.stage-repair {
+  width: 7%;
+  aspect-ratio: 1;
+  border-radius: 6px;
+}
+.stage-core {
+  width: 17%;
+  aspect-ratio: 1;
+  cursor: pointer;
+}
+.stage-message {
+  position: absolute;
+  inset: 45% 10% auto;
+  text-align: center;
+  color: #dfc598;
+}
+.stage-fallback {
+  min-height: 330px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  color: #d3bdcf;
+  line-height: 1.9;
+}
+.stage-fallback button {
+  min-height: 44px;
+}
+.experience:has(.webgl-stage) {
+  background: #06040a;
+}
+.scene-wrap:has(.webgl-stage) {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+@media (max-width: 600px) {
+  .stage-canvas {
+    aspect-ratio: 4 / 5;
+  }
+  .stage-core {
+    width: 25%;
+  }
+}

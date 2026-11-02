@@ -615,6 +615,7 @@ export function geometry() {
   mount = null;
   // Transform the entire assembly, including inset, louvres and fasteners.
   for (const placement of deviceMounts.slice(1)) {
+    const firstPart = parts.length;
     mount = placement;
     const c = placement.source;
     box("service.frame", [...c, 51], [36, 29, 3], "brass", 2);
@@ -630,6 +631,15 @@ export function geometry() {
     for (const dx of [-14, 14])
       for (const dy of [-10, 10])
         screw("service.screw", c[0] + dx, c[1] + dy, 54, 1);
+    finish();
+    if (placement === deviceMounts[1]) {
+      for (const part of parts.slice(firstPart)) {
+        part.joint = 5;
+        const data = groups.get(part.material);
+        for (let i = part.start * 7; i < (part.start + part.count) * 7; i += 7)
+          data[i + 6] = 5;
+      }
+    }
   }
   mount = null;
   // Characters are meshes in this same world, sharing lighting and shadows.
@@ -914,5 +924,11 @@ export function geometry() {
       ]);
   }
   finish();
+  for (const part of parts.filter((p) => p.name.startsWith("star."))) {
+    part.joint = 6;
+    const data = groups.get(part.material);
+    for (let i = part.start * 7; i < (part.start + part.count) * 7; i += 7)
+      data[i + 6] = 6;
+  }
   return { groups, parts };
 }

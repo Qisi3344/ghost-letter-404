@@ -6,8 +6,10 @@ import {
   gptPlacement,
   knotPath,
   dialOrigin,
+  deviceMounts,
 } from "./model.mjs";
 import { fitProjection, cameraOf, iso } from "../p0/vendor/iso-kit.mjs";
+export { dialOrigin, deviceMounts } from "./model.mjs";
 export const camera = fitProjection(
   [
     [-220, -220, 0],
@@ -66,11 +68,11 @@ export function start(
     lv = cross(light, lu);
   const shared = `
  precision highp float;
- uniform mat3 turns[3];uniform vec3 center,dialOrigin;uniform vec2 dialTurn;
+ uniform mat3 turns[3];uniform vec3 center,dialOrigin,repairOffset;uniform vec2 dialTurn;uniform float foldScale;
  vec3 dialRotate(vec3 p){return vec3(p.x*dialTurn.x-p.y*dialTurn.y,p.x*dialTurn.y+p.y*dialTurn.x,p.z);}
  in vec3 position;in vec3 normal;in float joint;
- vec3 worldPoint(){if(joint>3.5)return dialRotate(position-dialOrigin)+dialOrigin;if(joint<.5)return position;return turns[int(joint)-1]*position+center;}
- vec3 worldNormal(){if(joint>3.5)return dialRotate(normal);if(joint<.5)return normal;return turns[int(joint)-1]*normal;}
+ vec3 worldPoint(){if(joint>5.5)return center+(position-center)*foldScale;if(joint>4.5)return position+repairOffset;if(joint>3.5)return dialRotate(position-dialOrigin)+dialOrigin;if(joint<.5)return position;return turns[int(joint)-1]*position*foldScale+center;}
+ vec3 worldNormal(){if(joint>4.5)return normal;if(joint>3.5)return dialRotate(normal);if(joint<.5)return normal;return turns[int(joint)-1]*normal;}
  uniform vec3 lightU,lightV,lightDir;
  vec4 shadowPosition(vec3 p){p-=vec3(0.,0.,130.);return vec4(dot(p,lightU)/420.,dot(p,lightV)/420.,-dot(p,lightDir)/600.,1.);}
  `;
@@ -115,7 +117,7 @@ export function start(
  precision highp float;
  in vec3 p,n,local;in vec4 shadow;uniform sampler2D shadowMap;
  uniform vec3 eye,color,lightDir,gptOrigin,gptKnot;uniform float metal,rough,emission,kind,debug,gptScale;
- uniform sampler2D knotMap;
+ uniform sampler2D knotMap;uniform float power,effectsLevel;
  out vec4 frag;
  float nebula(vec3 q){
  float r=length(q.xy),a=atan(q.y,q.x);
@@ -185,7 +187,7 @@ export function start(
  float grainPhase=local.z*28.+length(local.xy)*17.;
  float grain=sin(grainPhase)*.012*(1.-smoothstep(.5,3.,fwidth(grainPhase)));
  rgb*=1.+metal*grain;
- vec3 toCore=vec3(0.,0.,236.)-p;float distance2=dot(toCore,toCore);rgb+=vec3(.12,.055,.25)*max(dot(N,normalize(toCore)),0.)*1200./(distance2+1200.);
+ vec3 toCore=vec3(0.,0.,236.)-p;float distance2=dot(toCore,toCore);rgb+=vec3(.12,.055,.25)*max(dot(N,normalize(toCore)),0.)*1200./(distance2+1200.)*power*effectsLevel;
  rgb+=color*emission;
  float alpha=1.;
  if(kind==1.){
@@ -200,6 +202,7 @@ export function start(
  alpha=clamp(.018+fresnel*.52+wall*.006+card*fresnel*.14,.025,.82);
  if(gl_FrontFacing){float density=0.;vec3 q=(p-vec3(0.,0.,236.))/61.;float span=max(dot(q,eye),0.)*2.;
  for(int i=0;i<20;i++){vec3 samplePoint=q-eye*span*(float(i)+.5)/20.;density+=nebula(samplePoint)*span/20.;}
+ density*=power*effectsLevel;
  rgb+=vec3(.3,.09,.8)*density*12.;alpha=clamp(alpha+density*1.5,.025,.9);}
  }
  rgb=pow(rgb/(rgb+vec3(.8)),vec3(1./2.2));
@@ -272,7 +275,7 @@ export function start(
     if (!locations.has(key)) locations.set(key, gl.getUniformLocation(p, name));
     return locations.get(key);
   }
-  function uniforms(p, angles, dial) {
+  function uniforms(p, angles, dial, effects) {
     gl.useProgram(p);
     gl.uniform2f(
       loc(p, "dialTurn"),
@@ -281,6 +284,15 @@ export function start(
     );
     gl.uniform3fv(loc(p, "center"), center);
     gl.uniform3fv(loc(p, "dialOrigin"), dialOrigin);
+    gl.uniform1f(loc(p, "foldScale"), 1 - effects.fold * 0.6);
+    const a = deviceMounts[1].angle,
+      offset = (1 - effects.repair) * 22;
+    gl.uniform3f(
+      loc(p, "repairOffset"),
+      Math.cos(a) * offset,
+      Math.sin(a) * offset,
+      (1 - effects.repair) * 6,
+    );
     gl.uniform3fv(loc(p, "lightDir"), light);
     gl.uniform3fv(loc(p, "lightU"), lu);
     gl.uniform3fv(loc(p, "lightV"), lv);
@@ -309,7 +321,22 @@ export function start(
     submitMs: 0,
   };
   canvas.stats = stats;
-  function render(angles = poses[0], debug = false, dial = angles[0]) {
+  function render(
+    angles = poses[0],
+    debug = false,
+    dial = angles[0],
+    options = {},
+  ) {
+    const effects = {
+      energy: 1,
+      corePower: 1,
+      repair: 1,
+      fold: 0,
+      lowEffects: false,
+      ...options,
+    };
+    if (!canvas.clientWidth || !canvas.clientHeight || gl.isContextLost())
+      return;
     const start = performance.now(),
       dpr = Math.min(4, Math.max(1, pixelRatio)),
       width = Math.round(canvas.clientWidth * dpr),
@@ -329,14 +356,19 @@ export function start(
     gl.polygonOffset(2, 4);
     gl.viewport(0, 0, 2048, 2048);
     gl.clear(gl.DEPTH_BUFFER_BIT);
-    uniforms(depthProgram, angles, dial);
+    uniforms(depthProgram, angles, dial, effects);
     for (const m of opaque) if (m.name !== "floor") draw(depthProgram, m);
     gl.disable(gl.POLYGON_OFFSET_FILL);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, width, height);
     gl.clearColor(0.024, 0.017, 0.039, 1);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    uniforms(beautyProgram, angles, dial);
+    uniforms(beautyProgram, angles, dial, effects);
+    gl.uniform1f(loc(beautyProgram, "power"), effects.corePower);
+    gl.uniform1f(
+      loc(beautyProgram, "effectsLevel"),
+      effects.lowEffects ? 0.2 : 1,
+    );
     gl.uniform4f(loc(beautyProgram, "cam"), C.sinA, C.cosA, C.sinE, C.cosE);
     const viewWidth = (900 * canvas.clientWidth) / canvas.clientHeight;
     gl.uniform2f(loc(beautyProgram, "frameSize"), viewWidth, 900);
@@ -368,10 +400,23 @@ export function start(
     );
     const material = (m) => {
       const a = materials[m.name];
-      gl.uniform3fv(loc(beautyProgram, "color"), a.color);
+      gl.uniform3fv(
+        loc(beautyProgram, "color"),
+        m.name === "crystal"
+          ? a.color.map((c) => c * (0.35 + effects.corePower * 0.65))
+          : a.color,
+      );
       gl.uniform1f(loc(beautyProgram, "metal"), a.metal);
       gl.uniform1f(loc(beautyProgram, "rough"), a.rough);
-      gl.uniform1f(loc(beautyProgram, "emission"), a.emission || 0);
+      gl.uniform1f(
+        loc(beautyProgram, "emission"),
+        (a.emission || 0) *
+          (m.name === "light"
+            ? effects.energy
+            : m.name === "crystal"
+              ? effects.corePower
+              : 1),
+      );
       gl.uniform1f(
         loc(beautyProgram, "kind"),
         m.name === "glass"
@@ -398,6 +443,7 @@ export function start(
     draw(beautyProgram, glass);
     gl.depthMask(true);
     stats.angles = [...angles];
+    stats.effects = { ...effects };
     stats.frames++;
     stats.submitMs = performance.now() - start;
   }

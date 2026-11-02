@@ -1,0 +1,305 @@
+{
+  "baseRevision": "b7a5dba458a479d67cf5a25184cef131e1f2795f",
+  "browserRun": {
+    "url": "http://127.0.0.1:4174/ghost-letter-404/",
+    "browser": "156.0.4314.58",
+    "capturedAt": "2026-11-02T15:48:32.517Z",
+    "results": [
+      {
+        "name": "desktop",
+        "viewport": {
+          "width": 1440,
+          "height": 1100
+        },
+        "reducedMotion": false,
+        "mouse": true,
+        "touch": false,
+        "keyboard": true,
+        "modelPixels": true,
+        "repairGpuOffset": true,
+        "liveSettings": true,
+        "offscreenStops": true,
+        "responsiveWidths": [
+          375,
+          390,
+          600,
+          601,
+          768,
+          1440,
+          1920
+        ],
+        "letterAndCard": true,
+        "unmountDisposes": true,
+        "restart": true,
+        "errors": []
+      },
+      {
+        "name": "phone",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "reducedMotion": true,
+        "mouse": false,
+        "touch": true,
+        "keyboard": true,
+        "modelPixels": true,
+        "repairGpuOffset": true,
+        "liveSettings": false,
+        "offscreenStops": false,
+        "responsiveWidths": [
+          390
+        ],
+        "letterAndCard": true,
+        "unmountDisposes": true,
+        "restart": true,
+        "errors": []
+      },
+      {
+        "name": "phone-motion",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "reducedMotion": false,
+        "mouse": false,
+        "touch": true,
+        "keyboard": true,
+        "modelPixels": true,
+        "repairGpuOffset": true,
+        "liveSettings": false,
+        "offscreenStops": false,
+        "responsiveWidths": [
+          390
+        ],
+        "letterAndCard": true,
+        "unmountDisposes": true,
+        "restart": true,
+        "errors": []
+      },
+      {
+        "name": "webgl-unavailable",
+        "fallbackControls": true,
+        "completeLetterAndCard": true
+      },
+      {
+        "name": "context-recovery",
+        "initializationRetry": true,
+        "realContextLoss": true,
+        "retryKeepsGameState": true
+      },
+      {
+        "name": "browser-webgl-disabled",
+        "launchFlag": "--disable-webgl",
+        "nativeNullContext": true,
+        "fallback": true
+      }
+    ]
+  },
+  "sourceNormalization": "UTF-8 text with LF newlines",
+  "sourceSha256": {
+    "src/stage/StageA.tsx": "f8e8cfe35033ecd4b94e616b7db614b00691690bcfbeca4db41ef3e4e12ccb15",
+    "src/stage/runtime.ts": "b879d11e2f47005e082ebbf68454fc0382aa4aa3fed9f524af875f0cc2d68765",
+    "src/stage/stageFrame.ts": "3d5bbf28d9b526fa1f004833407115ee7f86825642e551cf292a64502c5cf7e3",
+    "src/stage/useStageRenderer.ts": "6559061c23e6b6169fb5e4ef9ada168335c40e51f8ada9f4766afd0881723b09",
+    "src/stage/stage.css": "345570935acccb85b87178fb83ef750d8647feba0a359834b5d81b756061a770",
+    "src/app/App.tsx": "faa4e44b24260d51fce6e5b585d3e4c61acfb542c36babbbb6deea8bb114f61f",
+    "src/app/styles.css": "a72a411405457dc42b47adfcd14991b419b1abd596173d36ffc2757ad58b7b35",
+    "src/core/state.ts": "483d6df2ee8e0c4077310c97864edc57ad4c0df81cae36696d681638d0085e7d",
+    "public/stage-a/model.mjs": "067cde4b4b3e783ac7a26682477d87e9c9badb675591569db4d324425dcf3e38",
+    "public/stage-a/scene.mjs": "4a60357bcd53d3b3a1288cd2535b7753d21f280df61ca54d3a8951fad8e9f1d1",
+    "public/stage-a/moontide-models.mjs": "d40a7ebefe8c8b50f737106cc6cbacd783c1ec1fde972181b34dc24b6ae3994f",
+    "public/p0/vendor/iso-kit.mjs": "6d3ecc725d30c3b0346da309cf61dfa5a65017c23620bbd4093009d4fb104018"
+  },
+  "captures": [
+    {
+      "file": "context-lost.png",
+      "sha256": "225d10c3dff8e0898f874b9657a3a638914b027c19fd0e5fb8e7f0de777bd753",
+      "width": 1440,
+      "height": 1100,
+      "source": "Actual Edge page screenshot"
+    },
+    {
+      "file": "context-recovered.png",
+      "sha256": "266ff47e4e0226f8848387ceeeb9bb77e908600d5a271ab4c22bed1a8779fbce",
+      "width": 1440,
+      "height": 1465,
+      "source": "Actual Edge page screenshot"
+    },
+    {
+      "file": "desktop-aligning.png",
+      "sha256": "b4178c02060229eaed80d9f376286e772631526d54d4dae8493450454f5ed922",
+      "width": 1440,
+      "height": 1491,
+      "source": "Actual Edge page screenshot"
+    },
+    {
+      "file": "desktop-card.png",
+      "sha256": "21e854eb2f41bdc0a5f0fe2ed97da35d19b9e501b51a33c96fbc12fe7ebc1df3",
+      "width": 1080,
+      "height": 1440,
+      "source": "Browser download of the existing Canvas2D card"
+    },
+    {
+      "file": "desktop-core-ready.png",
+      "sha256": "89461fafdbce34b129dcfc023575ec390d4a43bea727c8fb987357443cdb8bb2",
+      "width": 1440,
+      "height": 1465,
+      "source": "Actual Edge page screenshot"
+    },
+    {
+      "file": "desktop-ending.png",
+      "sha256": "71d0f7b411e2c7c354b1cb996cfd943c514c1729e89b84bea15dbaaf6c4625d1",
+      "width": 1440,
+      "height": 1788,
+      "source": "Actual Edge page screenshot"
+    },
+    {
+      "file": "desktop-folding.png",
+      "sha256": "4d87d7283a6ce66759ca77330688ddcd21a4d4678cfc94c10e55e87e64ba9cfa",
+      "width": 1440,
+      "height": 1465,
+      "source": "Actual Edge page screenshot"
+    },
+    {
+      "file": "desktop-intro.png",
+      "sha256": "dd249fc07a3e749573c772ae12fd43d55ddd6ce07a6713444827e88d66d1de55",
+      "width": 1440,
+      "height": 1465,
+      "source": "Actual Edge page screenshot"
+    },
+    {
+      "file": "desktop-room.png",
+      "sha256": "a5ce97b479319e03a203423e7fb6576fddd9fd62792cd7db976684523eec878e",
+      "width": 1440,
+      "height": 1296,
+      "source": "Actual Edge page screenshot"
+    },
+    {
+      "file": "fallback-card.png",
+      "sha256": "21e854eb2f41bdc0a5f0fe2ed97da35d19b9e501b51a33c96fbc12fe7ebc1df3",
+      "width": 1080,
+      "height": 1440,
+      "source": "Browser download of the existing Canvas2D card"
+    },
+    {
+      "file": "fallback-ending.png",
+      "sha256": "0e59360ef50c0868d306457b7890228b139f1e97071eec18edba8da0ed69d252",
+      "width": 390,
+      "height": 1522,
+      "source": "Actual Edge page screenshot"
+    },
+    {
+      "file": "fallback-room.png",
+      "sha256": "a91c0862497197e0bc1c3b774bca346cd0e0a9d75697e81f2baf69e0287f1b67",
+      "width": 390,
+      "height": 974,
+      "source": "Actual Edge page screenshot"
+    },
+    {
+      "file": "native-webgl-disabled.png",
+      "sha256": "cfbb7c4a65cd9ca41640d54a7db0d1e14bd904c5e46b46cd519fba9907bc1fae",
+      "width": 390,
+      "height": 950,
+      "source": "Actual Edge page screenshot"
+    },
+    {
+      "file": "phone-aligning.png",
+      "sha256": "1c89305bd3ed8fa39a6b94dbe4ddf0f28193c9a5dd40a54dd39f160b16034701",
+      "width": 390,
+      "height": 1086,
+      "source": "Actual Edge page screenshot"
+    },
+    {
+      "file": "phone-card.png",
+      "sha256": "21e854eb2f41bdc0a5f0fe2ed97da35d19b9e501b51a33c96fbc12fe7ebc1df3",
+      "width": 1080,
+      "height": 1440,
+      "source": "Browser download of the existing Canvas2D card"
+    },
+    {
+      "file": "phone-core-ready.png",
+      "sha256": "a122d3744cb224ae4ce598d2e72c24067bbb2f3b533b68e894765ff62b7181d7",
+      "width": 390,
+      "height": 1050,
+      "source": "Actual Edge page screenshot"
+    },
+    {
+      "file": "phone-ending.png",
+      "sha256": "0e59360ef50c0868d306457b7890228b139f1e97071eec18edba8da0ed69d252",
+      "width": 390,
+      "height": 1522,
+      "source": "Actual Edge page screenshot"
+    },
+    {
+      "file": "phone-intro.png",
+      "sha256": "81b2ef07db4d7c7a185341eaafbaab037753c0c83263e359c5cb9052ca5c0b94",
+      "width": 390,
+      "height": 1060,
+      "source": "Actual Edge page screenshot"
+    },
+    {
+      "file": "phone-motion-aligning.png",
+      "sha256": "1c89305bd3ed8fa39a6b94dbe4ddf0f28193c9a5dd40a54dd39f160b16034701",
+      "width": 390,
+      "height": 1086,
+      "source": "Actual Edge page screenshot"
+    },
+    {
+      "file": "phone-motion-card.png",
+      "sha256": "21e854eb2f41bdc0a5f0fe2ed97da35d19b9e501b51a33c96fbc12fe7ebc1df3",
+      "width": 1080,
+      "height": 1440,
+      "source": "Browser download of the existing Canvas2D card"
+    },
+    {
+      "file": "phone-motion-core-ready.png",
+      "sha256": "d9ba88870f3077e5a913819f98408c8424f63279d6fe5e0915f61fe177983d33",
+      "width": 390,
+      "height": 1050,
+      "source": "Actual Edge page screenshot"
+    },
+    {
+      "file": "phone-motion-ending.png",
+      "sha256": "e9b31d51073f01ab131581b8b5d50cfa7ee4829872e6241de607f51992d1dbcd",
+      "width": 390,
+      "height": 1522,
+      "source": "Actual Edge page screenshot"
+    },
+    {
+      "file": "phone-motion-folding.png",
+      "sha256": "6041d6cb7db4301004aae9a43b3614f6ff0e20f49940d55ade43971a3e99a417",
+      "width": 390,
+      "height": 1022,
+      "source": "Actual Edge page screenshot"
+    },
+    {
+      "file": "phone-motion-intro.png",
+      "sha256": "81b2ef07db4d7c7a185341eaafbaab037753c0c83263e359c5cb9052ca5c0b94",
+      "width": 390,
+      "height": 1060,
+      "source": "Actual Edge page screenshot"
+    },
+    {
+      "file": "phone-motion-room.png",
+      "sha256": "0d481410eceec3081e3235c7a986fbc606cd306f9e8963bdc90304da24f10756",
+      "width": 390,
+      "height": 974,
+      "source": "Actual Edge page screenshot"
+    },
+    {
+      "file": "phone-no-webgl.png",
+      "sha256": "cfbb7c4a65cd9ca41640d54a7db0d1e14bd904c5e46b46cd519fba9907bc1fae",
+      "width": 390,
+      "height": 950,
+      "source": "Actual Edge page screenshot"
+    },
+    {
+      "file": "phone-room.png",
+      "sha256": "a91c0862497197e0bc1c3b774bca346cd0e0a9d75697e81f2baf69e0287f1b67",
+      "width": 390,
+      "height": 974,
+      "source": "Actual Edge page screenshot"
+    }
+  ]
+}
