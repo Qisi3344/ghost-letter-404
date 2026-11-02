@@ -20,13 +20,15 @@ const { clawd, gpt, knot } = Function(
 clawd.updateMatrixWorld(true);
 const meshes = [];
 clawd.traverseVisible((o) => {
-  if (!o.isMesh) return;
+  if (!o.isMesh || o.material.opacity === 0) return;
   const g = o.geometry.clone().applyMatrix4(o.matrixWorld);
   meshes.push({
     position: Array.from(g.attributes.position.array),
     normal: Array.from(g.attributes.normal.array),
     index: g.index ? Array.from(g.index.array) : null,
-    color: o.material.color.getHex(),
+    color: o.material.color.clone().convertLinearToSRGB().getHex(),
+    colorRGB: o.material.color.toArray(),
+    roughness: o.material.roughness ?? 0.75,
     leg: clawd.userData.legs.findIndex((l) => l.children.includes(o)),
   });
 });

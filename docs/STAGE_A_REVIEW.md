@@ -9,7 +9,7 @@
 - 外／中／内环半径 151／120／91，截面宽 12／10／8、厚 9／8／7；完整闭合倒角截面、卷边、刻槽与每环 120 个刻度。旋转采用 X → Y → X 父子变换，共用中心 `[0, 0, 236]`，没有可见支撑模型，深度模式也不生成支架。
 - 星核外壳半径 61，内部为六向立体星体、细环和局限在球内的程序化体积光。玻璃采用双面透明绘制、Fresnel 边缘和解析反射。
 - 底台为分层外圈、六个下沉线圈舱、检修甲板、中央感应器、虹膜叶片和独立控制盘。铜绕组位于舱内，角色脚下保留实体通道。
-- Clawd 与 GPT 已替换为“月汐小岛／小房子工坊”的原模型；保留圆角挤出螃蟹、GPT 连续曲面和原版结形标志，适配原有魔法帽。Clawd 原四腿扩为前后两排八腿，原替代身体与布罩已移除。来源、授权及重新生成说明见 [MOONTIDE_MODELS.md](MOONTIDE_MODELS.md)。
+- Clawd 与 GPT 已替换为“月汐小岛／小房子工坊”的原模型；保留圆角挤出螃蟹、GPT 连续曲面和原版结形标志，适配原有魔法帽。Clawd 已更新为 lab/clawd/clawd.js 的原生两排八腿方块版，原替代身体与布罩已移除。来源、授权及重新生成说明见 [MOONTIDE_MODELS.md](MOONTIDE_MODELS.md)。
 - 材质使用 GGX 直接高光和有限区域灯反射，金属与涂层分别控制粗糙度；帽檐具有实体包边。
 - 独立页面支持三个固定姿态、慢速运动、深度检查和键盘链接导航。静态、离屏、后台及减少动态效果模式停止连续帧循环。移动端采用同一相机方向的竖向裁切，不拉伸模型；触控链接保留 44 px 高度。
 
@@ -25,7 +25,7 @@
 - 使用 `fitProjection([[-220,-220,0],[220,220,0],[-220,220,0],[220,-220,0],[0,0,400]], 1200, 900, {pad:55, azimuth:45, elevation:30})`，具体投影值可从 `scene.mjs` 的 `camera` 导出读取。
 - 手机逻辑画幅 720 × 900，仅水平裁切空白，视角和几何关系不变。
 - 光源方向归一化 `[-0.5, 0.3, 0.82]`；2048² 阴影贴图；普通显示 DPR 上限 2，`?capture=1` 使用 DPR 4 重渲染。
-- 807 个命名部件、368844 个三角形。完整清单见 [components.json](visual/stage-a/components.json)。部件分组：`altar/foot/deck`、`driver/operator`、`emitter/induction`、`orbit`、`star`、`dock/service`、`Clawd`、`GPT`。
+- 809 个命名部件、370304 个三角形。完整清单见 [components.json](visual/stage-a/components.json)。部件分组：`altar/foot/deck`、`driver/operator`、`emitter/induction`、`orbit`、`star`、`dock/service`、`Clawd`、`GPT`。
 
 ## 真实浏览器截图
 

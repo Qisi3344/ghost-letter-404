@@ -19,13 +19,6 @@ export const materials = {
   glass: { color: [0.29, 0.22, 0.47], metal: 0.1, rough: 0.12 },
   floor: { color: [0.026, 0.02, 0.041], metal: 0.15, rough: 0.8 },
 };
-materials["moon-orange"] = {
-  color: [0.694, 0.184, 0.095],
-  metal: 0,
-  rough: 0.58,
-};
-materials["moon-eye"] = { color: [0.027, 0.042, 0.107], metal: 0, rough: 0.5 };
-materials["moon-white"] = { color: [0.965, 0.982, 1], metal: 0, rough: 0.75 };
 materials["moon-gpt"] = { color: [0.922, 0.88, 0.823], metal: 0, rough: 0.92 };
 export const gptPlacement = {
   x: 188,
@@ -678,7 +671,7 @@ export function geometry() {
   // Original workshop meshes, transformed from Y-up/+Z-front into this scene.
   const u = [Math.SQRT1_2, -Math.SQRT1_2, 0],
     f = [Math.SQRT1_2, Math.SQRT1_2, 0];
-  function imported(id, mesh, c, scale, material, legRow = null) {
+  function imported(id, mesh, c, scale, material) {
     begin(id, material);
     const index =
       mesh.index ||
@@ -688,10 +681,6 @@ export function geometry() {
         const i = index[t + offset] * 3,
           p = mesh.position.slice(i, i + 3),
           n = mesh.normal.slice(i, i + 3);
-        if (legRow !== null) {
-          p[2] = p[2] * 0.48 + (legRow ? 0.36 : -0.36);
-          n[2] /= 0.48;
-        }
         if (id.startsWith("Clawd")) {
           const a = 0.28,
             cs = Math.cos(a),
@@ -726,16 +715,17 @@ export function geometry() {
     cs = 52 / (clawdMax - clawdMin),
     base = [cx, cy, z - clawdMin * cs];
   moonModels.clawd.forEach((m, i) => {
-    const material =
-      m.color === 0xd97757
-        ? "moon-orange"
-        : m.color === 0x2e3a5c
-          ? "moon-eye"
-          : "moon-white";
+    const material = "moon-clawd-" + i;
+    materials[material] = { color: m.colorRGB, metal: 0, rough: m.roughness };
     if (m.leg >= 0)
-      for (let row = 0; row < 2; row++)
-        imported(`Clawd.leg.${row}.${m.leg}`, m, base, cs, material, row);
-    else imported("Clawd.workshop." + i, m, base, cs, material);
+      imported(
+        `Clawd.leg.${m.leg % 2}.${Math.floor(m.leg / 2)}`,
+        m,
+        base,
+        cs,
+        material,
+      );
+    else imported("Clawd.lab." + i, m, base, cs, material);
   });
   hat("Clawd.hat", cx, cy, z + 51, 0.9);
   const px = cx + 24,
