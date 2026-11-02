@@ -18,6 +18,7 @@ const browser = await chromium.launch({
 const page = await browser.newPage({
     viewport: { width: 1440, height: 1120 },
     deviceScaleFactor: 1,
+    hasTouch: true,
   }),
   errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
@@ -65,6 +66,10 @@ try {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(url);
   await page.waitForFunction(() => window.scene?.stats.frames > 0);
+  assert.equal(
+    await page.locator("#wheel").getAttribute("aria-valuenow"),
+    "12",
+  );
   const fixedFrames = await page.evaluate(() => scene.stats.frames);
   await page.waitForTimeout(150);
   assert.equal(await page.evaluate(() => scene.stats.frames), fixedFrames);
@@ -75,8 +80,38 @@ try {
   );
   await page.screenshot({ path: `${out}/main-stage-mobile.png` });
   await page.keyboard.press("Tab");
-  assert.equal(await page.locator(":focus").textContent(), "静态 A");
-  await page.keyboard.press("Tab");
+  assert.equal(await page.locator(":focus").getAttribute("id"), "wheel");
+  await page.keyboard.press("ArrowRight");
+  assert.equal(
+    await page.locator("#wheel").getAttribute("aria-valuenow"),
+    "14",
+  );
+  await page.locator('[data-ring="1"]').click();
+  const wheel = page.locator("#wheel");
+  const bounds = await wheel.boundingBox(),
+    x = bounds.x + bounds.width / 2,
+    y = bounds.y + bounds.height / 2;
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchStart",
+    touchPoints: [{ x, y }],
+  });
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchMove",
+    touchPoints: [{ x: x + 60, y: y - 10 }],
+  });
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchEnd",
+    touchPoints: [],
+  });
+  assert.equal(
+    await page.evaluate(() => Math.round(scene.stats.angles[1])),
+    96,
+    "touch must turn the middle orbit",
+  );
+  await page.locator("#reset").click();
+  assert.deepEqual(await page.evaluate(() => scene.stats.angles), [12, 54, 62]);
+  await page.locator("nav a").nth(1).focus();
   await page.keyboard.press("Enter");
   await page.waitForURL("**?pose=1");
   await page.waitForFunction(() => window.scene?.stats.frames > 0);
@@ -107,6 +142,56 @@ try {
       ),
     );
   }
+  await page.setViewportSize({ width: 1440, height: 1250 });
+  await page.goto(url);
+  await page.waitForFunction(() => window.scene?.stats.frames > 0);
+  const imageBefore = await page.locator("canvas").screenshot();
+  const dial = await wheel.boundingBox();
+  await page.mouse.move(dial.x + dial.width / 2, dial.y + dial.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(
+    dial.x + dial.width / 2 + 80,
+    dial.y + dial.height / 2 - 20,
+    { steps: 8 },
+  );
+  await page.mouse.up();
+  assert.equal(
+    await page.evaluate(() => Math.round(scene.stats.angles[0])),
+    72,
+    "mouse must turn the outer orbit",
+  );
+  assert(
+    !imageBefore.equals(await page.locator("canvas").screenshot()),
+    "orbit control must change pixels",
+  );
+  await page.screenshot({ path: `${out}/controls-desktop.png` });
+  await wheel.focus();
+  await page.keyboard.press("End");
+  await page.keyboard.press("ArrowRight");
+  assert.equal(
+    await wheel.getAttribute("aria-valuenow"),
+    "1",
+    "angles must wrap",
+  );
+  await page.locator('[data-ring="2"]').click();
+  await wheel.focus();
+  await page.keyboard.press("ArrowLeft");
+  assert.equal(await page.evaluate(() => scene.stats.angles[2]), 60);
+  await page.locator("#reset").click();
+  assert.deepEqual(await page.evaluate(() => scene.stats.angles), [12, 54, 62]);
+  await page.goto(`${url}?motion=1`);
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.waitForFunction(() => window.scene?.stats.frames > 3);
+  await wheel.focus();
+  await page.keyboard.press("ArrowRight");
+  await page.waitForTimeout(100);
+  const manualFrame = await page.evaluate(() => scene.stats.frames);
+  await page.waitForTimeout(200);
+  assert.equal(
+    await page.evaluate(() => scene.stats.frames),
+    manualFrame,
+    "manual input must pause the idle tour",
+  );
   assert.deepEqual(errors, []);
   const report = {
     parts: stats.parts,
@@ -120,6 +205,14 @@ try {
     horizontalOverflow: false,
     keyboardNavigation: true,
     responsiveWidths,
+    orbitControl: {
+      mouse: true,
+      touch: true,
+      keyboard: true,
+      reset: true,
+      wrap: true,
+      idleHandoff: true,
+    },
     errors,
   };
   writeFileSync(`${out}/browser.json`, JSON.stringify(report, null, 2));

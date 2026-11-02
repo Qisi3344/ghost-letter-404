@@ -724,7 +724,7 @@
 {"name":"dial.tick.21","material":"brass","joint":0},
 {"name":"dial.tick.22","material":"brass","joint":0},
 {"name":"dial.tick.23","material":"brass","joint":0},
-{"name":"dial.needle","material":"light","joint":0},
+{"name":"dial.needle","material":"light","joint":4},
 {"name":"dock.screw","material":"steel","joint":0},
 {"name":"dock.screw.slot","material":"black","joint":0},
 {"name":"dock.screw.1","material":"steel","joint":0},

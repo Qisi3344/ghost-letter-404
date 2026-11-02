@@ -2,7 +2,7 @@
   "parts": 803,
   "triangles": 363036,
   "framesIn2Seconds": 121,
-  "submitMs": 0.7999999988824129,
+  "submitMs": 0.8000000007450581,
   "threePoses": true,
   "depthCapture": true,
   "reducedMotion": true,
@@ -15,5 +15,13 @@
     601,
     768
   ],
+  "orbitControl": {
+    "mouse": true,
+    "touch": true,
+    "keyboard": true,
+    "reset": true,
+    "wrap": true,
+    "idleHandoff": true
+  },
   "errors": []
 }

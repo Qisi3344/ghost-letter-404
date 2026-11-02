@@ -22,7 +22,7 @@ for (const [material, data] of groups) {
       Math.abs(Math.hypot(nx, ny, nz) - 1) < 1e-5,
       `${material}: non-unit normal`,
     );
-    if (joint) {
+    if (joint > 0 && joint <= 3) {
       const r = Math.hypot(x, y, z),
         shell = shells[joint - 1];
       shell.min = Math.min(shell.min, r);

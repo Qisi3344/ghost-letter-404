@@ -260,8 +260,8 @@ export function geometry() {
         );
       }
   }
-  function tube(id, points, r, m = "brass") {
-    begin(id, m);
+  function tube(id, points, r, m = "brass", joint = 0) {
+    begin(id, m, joint);
     for (let i = 0; i < points.length - 1; i++) {
       const a = points[i],
         b = points[i + 1],
@@ -553,6 +553,7 @@ export function geometry() {
     ],
     0.6,
     "light",
+    4,
   );
   for (const x of [-97, -53])
     for (const y of [88, 118]) screw("dock.screw", x, y, 70, 1.4);

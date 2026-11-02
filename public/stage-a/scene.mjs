@@ -65,10 +65,11 @@ export function start(
     lv = cross(light, lu);
   const shared = `
  precision highp float;
- uniform mat3 turns[3];uniform vec3 center;
+ uniform mat3 turns[3];uniform vec3 center;uniform vec2 dialTurn;
+ vec3 dialRotate(vec3 p){return vec3(p.x*dialTurn.x-p.y*dialTurn.y,p.x*dialTurn.y+p.y*dialTurn.x,p.z);}
  in vec3 position;in vec3 normal;in float joint;
- vec3 worldPoint(){if(joint<.5)return position;return turns[int(joint)-1]*position+center;}
- vec3 worldNormal(){if(joint<.5)return normal;return turns[int(joint)-1]*normal;}
+ vec3 worldPoint(){if(joint>3.5)return dialRotate(position-vec3(-75.,103.,74.))+vec3(-75.,103.,74.);if(joint<.5)return position;return turns[int(joint)-1]*position+center;}
+ vec3 worldNormal(){if(joint>3.5)return dialRotate(normal);if(joint<.5)return normal;return turns[int(joint)-1]*normal;}
  uniform vec3 lightU,lightV,lightDir;
  vec4 shadowPosition(vec3 p){p-=vec3(0.,0.,130.);return vec4(dot(p,lightU)/420.,dot(p,lightV)/420.,-dot(p,lightDir)/600.,1.);}
  `;
@@ -251,8 +252,13 @@ export function start(
     if (!locations.has(key)) locations.set(key, gl.getUniformLocation(p, name));
     return locations.get(key);
   }
-  function uniforms(p, angles) {
+  function uniforms(p, angles, dial) {
     gl.useProgram(p);
+    gl.uniform2f(
+      loc(p, "dialTurn"),
+      Math.cos((dial * Math.PI) / 180 - Math.atan2(4, 10)),
+      Math.sin((dial * Math.PI) / 180 - Math.atan2(4, 10)),
+    );
     gl.uniform3fv(loc(p, "center"), center);
     gl.uniform3fv(loc(p, "lightDir"), light);
     gl.uniform3fv(loc(p, "lightU"), lu);
@@ -282,7 +288,7 @@ export function start(
     submitMs: 0,
   };
   canvas.stats = stats;
-  function render(angles = poses[0], debug = false) {
+  function render(angles = poses[0], debug = false, dial = angles[0]) {
     const start = performance.now(),
       dpr = Math.min(4, Math.max(1, pixelRatio)),
       width = Math.round(canvas.clientWidth * dpr),
@@ -300,13 +306,13 @@ export function start(
     gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
     gl.viewport(0, 0, 2048, 2048);
     gl.clear(gl.DEPTH_BUFFER_BIT);
-    uniforms(depthProgram, angles);
+    uniforms(depthProgram, angles, dial);
     for (const m of opaque) if (m.name !== "floor") draw(depthProgram, m);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, width, height);
     gl.clearColor(0.024, 0.017, 0.039, 1);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    uniforms(beautyProgram, angles);
+    uniforms(beautyProgram, angles, dial);
     gl.uniform4f(loc(beautyProgram, "cam"), C.sinA, C.cosA, C.sinE, C.cosE);
     const viewWidth = (900 * canvas.clientWidth) / canvas.clientHeight;
     gl.uniform2f(loc(beautyProgram, "frameSize"), viewWidth, 900);
@@ -367,6 +373,7 @@ export function start(
     gl.cullFace(gl.BACK);
     draw(beautyProgram, glass);
     gl.depthMask(true);
+    stats.angles = [...angles];
     stats.frames++;
     stats.submitMs = performance.now() - start;
   }
