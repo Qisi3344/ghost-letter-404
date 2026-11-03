@@ -1,0 +1,96 @@
+{
+  "url": "http://127.0.0.1:4174/ghost-letter-404/",
+  "browser": "156.0.4314.58",
+  "capturedAt": "2026-11-02T15:48:32.517Z",
+  "results": [
+    {
+      "name": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "reducedMotion": false,
+      "mouse": true,
+      "touch": false,
+      "keyboard": true,
+      "modelPixels": true,
+      "repairGpuOffset": true,
+      "liveSettings": true,
+      "offscreenStops": true,
+      "responsiveWidths": [
+        375,
+        390,
+        600,
+        601,
+        768,
+        1440,
+        1920
+      ],
+      "letterAndCard": true,
+      "unmountDisposes": true,
+      "restart": true,
+      "errors": []
+    },
+    {
+      "name": "phone",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "reducedMotion": true,
+      "mouse": false,
+      "touch": true,
+      "keyboard": true,
+      "modelPixels": true,
+      "repairGpuOffset": true,
+      "liveSettings": false,
+      "offscreenStops": false,
+      "responsiveWidths": [
+        390
+      ],
+      "letterAndCard": true,
+      "unmountDisposes": true,
+      "restart": true,
+      "errors": []
+    },
+    {
+      "name": "phone-motion",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "reducedMotion": false,
+      "mouse": false,
+      "touch": true,
+      "keyboard": true,
+      "modelPixels": true,
+      "repairGpuOffset": true,
+      "liveSettings": false,
+      "offscreenStops": false,
+      "responsiveWidths": [
+        390
+      ],
+      "letterAndCard": true,
+      "unmountDisposes": true,
+      "restart": true,
+      "errors": []
+    },
+    {
+      "name": "webgl-unavailable",
+      "fallbackControls": true,
+      "completeLetterAndCard": true
+    },
+    {
+      "name": "context-recovery",
+      "initializationRetry": true,
+      "realContextLoss": true,
+      "retryKeepsGameState": true
+    },
+    {
+      "name": "browser-webgl-disabled",
+      "launchFlag": "--disable-webgl",
+      "nativeNullContext": true,
+      "fallback": true
+    }
+  ]
+}

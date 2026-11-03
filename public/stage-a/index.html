@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>404 · 量子祭坛</title>
+    <link rel="icon" href="data:," />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #06040a;
+        color: #c4b2cd;
+        font-family: Georgia, "Songti SC", serif;
+      }
+      main {
+        max-width: 1440px;
+        margin: auto;
+        position: relative;
+      }
+      header {
+        position: absolute;
+        top: 28px;
+        left: 7%;
+        z-index: 1;
+        pointer-events: none;
+      }
+      header small {
+        font: 9px system-ui;
+        letter-spacing: 4px;
+        color: #a88865;
+      }
+      h1 {
+        font-size: 24px;
+        letter-spacing: 5px;
+        font-weight: 400;
+        margin: 14px 0;
+      }
+      canvas {
+        display: block;
+        width: 100%;
+        aspect-ratio: 4/3;
+      }
+      nav {
+        display: flex;
+        justify-content: center;
+        gap: 24px;
+        padding: 14px;
+        font: 11px system-ui;
+        letter-spacing: 1px;
+      }
+      a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        min-width: 44px;
+        color: #ba9d73;
+        text-decoration: none;
+      }
+      a:focus-visible {
+        outline: 2px solid #bba0ee;
+      }
+      a[aria-current="page"] {
+        color: #e9c997;
+        text-decoration: underline;
+        text-underline-offset: 5px;
+      }
+      #wheel {
+        position: absolute;
+        min-width: 44px;
+        min-height: 44px;
+        width: 5%;
+        aspect-ratio: 1;
+        transform: translate(-50%, -50%);
+        border: 1px solid transparent;
+        border-radius: 50%;
+        cursor: ew-resize;
+        touch-action: none;
+        z-index: 2;
+      }
+      #wheel:hover,
+      #wheel:focus-visible,
+      #wheel.dragging {
+        border-color: #dbb67d;
+        outline: 2px solid #dbb67d55;
+        background: #dbb67d12;
+      }
+      #controls {
+        text-align: center;
+        font: 12px system-ui;
+        color: #b9a5c4;
+        padding: 0 16px;
+      }
+      #controls p {
+        font-size: 11px;
+        color: #a992b2;
+      }
+      #controls button {
+        background: transparent;
+        border: 1px solid #62516d;
+        color: #c6afcb;
+        border-radius: 4px;
+        min-height: 44px;
+        min-width: 52px;
+        margin: 3px;
+        cursor: pointer;
+      }
+      #controls button[aria-pressed="true"] {
+        border-color: #d9b77c;
+        color: #ecd0a1;
+      }
+      #controls output {
+        display: inline-block;
+        min-width: 90px;
+        color: #dfc598;
+      }
+      button:focus-visible {
+        outline: 2px solid #d9b77c;
+      }
+      #error {
+        color: #dfb4c4;
+        text-align: center;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      #review {
+        padding: 16px;
+        text-align: center;
+        font: 12px system-ui;
+      }
+      #review button,
+      #error a {
+        min-height: 44px;
+        margin: 4px;
+        padding: 8px 16px;
+      }
+      body.unavailable canvas,
+      body.unavailable #wheel,
+      body.unavailable #controls,
+      body.unavailable nav,
+      body.unavailable #review {
+        display: none;
+      }
+      body.unavailable header {
+        position: static;
+        margin: 36px;
+      }
+      body.unavailable #error {
+        max-width: 520px;
+        margin: 80px auto;
+        padding: 24px;
+        line-height: 1.8;
+      }
+      @media (max-width: 600px) {
+        header {
+          position: relative;
+          top: auto;
+          left: auto;
+          margin: 22px 28px 0;
+        }
+        h1 {
+          font-size: 17px;
+        }
+        header small {
+          font-size: 7px;
+        }
+        canvas {
+          aspect-ratio: 4/5;
+        }
+        nav {
+          gap: 10px;
+          font-size: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <small>THE GHOST IN THE QUANTUM MACHINE</small>
+        <h1>404 · 星光约束场</h1>
+      </header>
+      <canvas
+        aria-label="三重金属星轨围绕玻璃星核悬浮，Clawd 与 GPT 在量子祭坛旁协作"
+      ></canvas>
+      <div
+        id="wheel"
+        role="slider"
+        tabindex="0"
+        aria-label="星轨控制盘"
+        aria-valuemin="0"
+        aria-valuemax="359"
+        aria-valuenow="12"
+        aria-orientation="horizontal"
+        aria-describedby="control-hint"
+      ></div>
+      <section id="controls" aria-label="星轨控制">
+        <p id="control-hint">
+          左右拨动左下方控制盘 · 方向键微调 · 选择要转动的星轨
+        </p>
+        <button type="button" data-ring="0" aria-pressed="true">外环</button
+        ><button type="button" data-ring="1" aria-pressed="false">中环</button
+        ><button type="button" data-ring="2" aria-pressed="false">内环</button>
+        <output id="angle" aria-live="polite"></output
+        ><button type="button" id="reset">复位</button>
+      </section>
+      <p id="error" role="status"></p>
+      <nav>
+        <a href="?pose=0">静态 A</a><a href="?pose=1">姿态 B</a
+        ><a href="?pose=2">姿态 C</a><a href="?motion=1">缓慢旋转</a
+        ><a href="?depth=1">深度检查</a>
+      </nav>
+      <section id="review" hidden aria-label="验收截图导出">
+        <p>导出当前浏览器的 4× 原始渲染；局部图只裁切，不放大或修饰。</p>
+        <button type="button" data-export="full">导出全景</button>
+        <button type="button" data-export="core">导出金属与玻璃</button>
+        <button type="button" data-export="glass">导出玻璃星核</button>
+        <button type="button" data-export="console">导出底台与控制盘</button>
+        <button type="button" data-export="clawd">导出 Clawd</button>
+        <button type="button" data-export="gpt">导出 GPT</button>
+      </section>
+    </main>
+    <script type="module">
+      import { start, project } from "./scene.mjs";
+      import { poses, dialOrigin } from "./model.mjs";
+      const canvas = document.querySelector("canvas"),
+        params = new URLSearchParams(location.search),
+        calm = matchMedia("(prefers-reduced-motion: reduce)");
+      function showUnavailable(error) {
+        document.body.classList.add("unavailable");
+        const status = document.querySelector("#error");
+        status.setAttribute("role", "alert");
+        const message = document.createElement("p");
+        message.textContent =
+          error.message + " 请在支持 WebGL 2 的浏览器中启用硬件加速后重试。";
+        const retry = document.createElement("a");
+        retry.href = location.pathname;
+        retry.textContent = "重新尝试加载舞台";
+        status.replaceChildren(message, retry);
+      }
+      try {
+        if (params.get("webgl") === "off")
+          throw Error("此场景需要支持 WebGL 2 的浏览器。");
+        const scene = start(canvas, {
+          pixelRatio: params.has("capture") ? 4 : undefined,
+        });
+        window.scene = scene;
+        let t = 0,
+          last = performance.now(),
+          visible = true,
+          failed = false,
+          frameId = 0;
+        const poseIndex = poses[Number(params.get("pose"))]
+            ? Number(params.get("pose"))
+            : 0,
+          fixed = poses[poseIndex];
+        document
+          .querySelectorAll("nav a")
+          [
+            params.has("depth") ? 4 : params.has("motion") ? 3 : poseIndex
+          ].setAttribute("aria-current", "page");
+        const wheel = document.querySelector("#wheel"),
+          readout = document.querySelector("#angle"),
+          rings = [...document.querySelectorAll("[data-ring]")],
+          names = ["外环", "中环", "内环"];
+        let angles = [...fixed],
+          manual = false,
+          selected = 0,
+          drag = null;
+        const current = () =>
+          params.has("motion") && !calm.matches && !manual
+            ? [12 + 8 * Math.sin(t * 0.1), 54 + t * 2, 62 - t * 3]
+            : angles;
+        const value = () =>
+          ((Math.round(current()[selected]) % 360) + 360) % 360;
+        const draw = () => {
+          if (failed) return;
+          scene.render(current(), params.has("depth"), current()[selected]);
+          readout.setAttribute("aria-live", manual ? "polite" : "off");
+          readout.textContent = names[selected] + " " + value() + "°";
+          wheel.setAttribute("aria-valuenow", value());
+          wheel.setAttribute("aria-valuetext", readout.textContent);
+          const p = project(dialOrigin),
+            w = (900 * canvas.clientWidth) / canvas.clientHeight,
+            k = canvas.clientHeight / 900;
+          wheel.style.left =
+            canvas.offsetLeft + (p[0] - (1200 - w) / 2) * k + "px";
+          wheel.style.top = canvas.offsetTop + p[1] * k + "px";
+        };
+        const moving = () =>
+          !failed &&
+          visible &&
+          !document.hidden &&
+          params.has("motion") &&
+          !calm.matches &&
+          !manual;
+        function takeControl() {
+          angles = [...current()];
+          manual = true;
+          schedule();
+          document
+            .querySelector("nav [aria-current]")
+            ?.removeAttribute("aria-current");
+        }
+        function change(delta) {
+          takeControl();
+          angles[selected] = (((angles[selected] + delta) % 360) + 360) % 360;
+          draw();
+        }
+        rings.forEach((button, i) =>
+          button.addEventListener("click", () => {
+            takeControl();
+            selected = i;
+            rings.forEach((b, j) => b.setAttribute("aria-pressed", i === j));
+            draw();
+          }),
+        );
+        document.querySelector("#reset").addEventListener("click", () => {
+          takeControl();
+          angles = [...fixed];
+          draw();
+        });
+        wheel.addEventListener("pointerdown", (e) => {
+          if (e.button !== 0 || drag) return;
+          takeControl();
+          drag = {
+            id: e.pointerId,
+            x: e.clientX,
+            y: e.clientY,
+            start: angles[selected],
+          };
+          wheel.setPointerCapture(e.pointerId);
+          wheel.classList.add("dragging");
+          e.preventDefault();
+          wheel.focus({ preventScroll: true });
+        });
+        wheel.addEventListener("pointermove", (e) => {
+          if (!drag || e.pointerId !== drag.id) return;
+          angles[selected] =
+            (((drag.start + (e.clientX - drag.x - (e.clientY - drag.y)) * 0.6) %
+              360) +
+              360) %
+            360;
+          draw();
+        });
+        const release = () => {
+          drag = null;
+          wheel.classList.remove("dragging");
+        };
+        wheel.addEventListener("lostpointercapture", release);
+        wheel.addEventListener("pointercancel", release);
+        wheel.addEventListener("pointerup", (e) => {
+          if (drag?.id === e.pointerId) {
+            wheel.releasePointerCapture(e.pointerId);
+            release();
+          }
+        });
+        wheel.addEventListener("keydown", (e) => {
+          const delta = {
+            ArrowLeft: -2,
+            ArrowDown: -2,
+            ArrowRight: 2,
+            ArrowUp: 2,
+            PageDown: -10,
+            PageUp: 10,
+          }[e.key];
+          if (delta !== undefined) {
+            e.preventDefault();
+            change(delta);
+          } else if (e.key === "Home" || e.key === "End") {
+            e.preventDefault();
+            takeControl();
+            angles[selected] = e.key === "Home" ? 0 : 359;
+            draw();
+          }
+        });
+        draw();
+        if (params.has("capture")) {
+          const review = document.querySelector("#review");
+          review.hidden = false;
+          review.addEventListener("click", async (event) => {
+            const type = event.target.dataset.export;
+            if (!type) return;
+            draw();
+            const k = canvas.clientHeight / 900;
+            const w = (900 * canvas.clientWidth) / canvas.clientHeight;
+            const region = {
+              core: [600, 270, 690, 470],
+              glass: [600, 278, 265, 265],
+              console: [600, 570, 700, 360],
+              clawd: [386, 390, 185, 220],
+              gpt: [885, 425, 175, 235],
+            }[type];
+            const crop = document.createElement("canvas");
+            const [cx, cy, cw, ch] = region || [600, 450, w, 900];
+            const x = region ? (cx - cw / 2 - (1200 - w) / 2) * k : 0;
+            const y = region ? (cy - ch / 2) * k : 0;
+            const dpr = canvas.width / canvas.clientWidth;
+            crop.width = Math.round(cw * k * dpr);
+            crop.height = Math.round(ch * k * dpr);
+            crop
+              .getContext("2d")
+              .drawImage(
+                canvas,
+                Math.round(x * dpr),
+                Math.round(y * dpr),
+                crop.width,
+                crop.height,
+                0,
+                0,
+                crop.width,
+                crop.height,
+              );
+            const blob = await new Promise((resolve) =>
+              crop.toBlob(resolve, "image/png"),
+            );
+            const href = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = href;
+            link.download = `stage-a-${type}-4x.png`;
+            link.click();
+            setTimeout(() => URL.revokeObjectURL(href), 1000);
+          });
+        }
+        new ResizeObserver(draw).observe(canvas);
+        function frame(now) {
+          t += Math.min(0.05, (now - last) / 1000);
+          draw();
+          last = now;
+          if (moving()) frameId = requestAnimationFrame(frame);
+        }
+        function schedule() {
+          cancelAnimationFrame(frameId);
+          last = performance.now();
+          if (moving()) frameId = requestAnimationFrame(frame);
+        }
+        new IntersectionObserver((e) => {
+          visible = e[0].isIntersecting;
+          schedule();
+        }).observe(canvas);
+        document.addEventListener("visibilitychange", schedule);
+        calm.addEventListener("change", () => {
+          draw();
+          schedule();
+        });
+        schedule();
+        canvas.addEventListener("webglcontextlost", (event) => {
+          event.preventDefault();
+          failed = true;
+          cancelAnimationFrame(frameId);
+          showUnavailable(Error("舞台的图形连接已中断。"));
+        });
+      } catch (e) {
+        showUnavailable(e);
+        if (params.get("webgl") !== "off") console.error(e);
+      }
+    </script>
+  </body>
+</html>

@@ -2,7 +2,7 @@ import { useEffect, useReducer, useRef, useState } from "react";
 import { initialState, reducer, alignmentError, angles } from "../core/state";
 import { letter, tones } from "../content/letters";
 import { playSound } from "../audio/sfx";
-import { OrreryScene } from "../scenes/OrreryScene";
+import { StageA } from "../stage/StageA";
 import { LetterRoomScene } from "../scenes/LetterRoomScene";
 import { EndingScene } from "../scenes/EndingScene";
 const stageCopy = {
@@ -20,14 +20,14 @@ const stageCopy = {
   ],
   aligning: [
     "02",
-    "让两条轨道靠近",
-    "左右拖动外环，让双星落入发光的星形卡槽。",
+    "校准星轨共振",
+    "拨动左下方控制盘，让中环与内环对准共振角度。",
     "差一点。那里有个刻度，星星认得回家的路。",
   ],
   repairing: [
     "03",
-    "有颗齿轮开了小差",
-    "把右侧偏齿轮向左拖回空着的轴心。",
+    "检修舱还没有锁定",
+    "把前方的百叶检修盖向左推回舱内，松手锁定。",
     "不是故障！是南瓜……算了，先帮我一下。",
   ],
   coreReady: [
@@ -240,16 +240,20 @@ export function App() {
                 {inRoom ? (
                   <LetterRoomScene state={s} dispatch={dispatch} />
                 ) : (
-                  <OrreryScene state={s} dispatch={dispatch} />
+                  <StageA state={s} dispatch={dispatch} />
                 )}
-                <div className="scene-margin left">
-                  <span>EST. ∞</span>
-                  <span>NO. 00404</span>
-                </div>
-                <div className="scene-margin right">
-                  <span>星际机械研究所</span>
-                  <span>31 OCT / 2026</span>
-                </div>
+                {inRoom && (
+                  <>
+                    <div className="scene-margin left">
+                      <span>EST. ∞</span>
+                      <span>NO. 00404</span>
+                    </div>
+                    <div className="scene-margin right">
+                      <span>星际机械研究所</span>
+                      <span>31 OCT / 2026</span>
+                    </div>
+                  </>
+                )}
               </div>
               <div className="dialogue" aria-live="polite">
                 <span className="speaker">
@@ -310,6 +314,9 @@ export function App() {
                       <small className="angle-readout">
                         中环 {a.middle.toFixed(0)}° · 内环 {a.inner.toFixed(0)}°
                       </small>
+                      <small className="angle-readout">
+                        目标：中环 120° · 内环 75°
+                      </small>
                     </div>
                     <div className="adjust">
                       <button
@@ -330,7 +337,7 @@ export function App() {
                 {s.act === "repairing" && (
                   <>
                     <div className="readout">
-                      <span>齿轮回位</span>
+                      <span>检修盖归位</span>
                       <strong>
                         {Math.round(s.repairProgress * 100)}
                         <small>%</small>

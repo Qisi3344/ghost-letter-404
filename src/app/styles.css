@@ -418,26 +418,8 @@ a {
 .progress [aria-current] {
   color: #e5c6e8;
 }
-.drag-target {
-  touch-action: none;
-  cursor: grab;
-}
-.drag-target:active {
-  cursor: grabbing;
-}
-.drag-target:focus-visible {
-  outline: none;
-  filter: drop-shadow(0 0 6px #c1a2e9);
-}
-.core[tabindex="0"] {
-  cursor: pointer;
-}
 .hint-pulse {
   animation: pulse 2.5s ease-in-out infinite;
-}
-.core-ready {
-  animation: pulse 2s ease-in-out infinite;
-  transform-origin: 500px 333px;
 }
 .character {
   pointer-events: none;
@@ -465,35 +447,6 @@ a {
 }
 .character.celebrate .ghost-body {
   animation: hop 0.8s ease-in-out 2;
-}
-.hatch {
-  opacity: 0;
-  transition: opacity 0.6s;
-}
-.folding .hatch {
-  opacity: 1;
-}
-.folding .machine {
-  animation: zoom-in 2.4s ease-in-out forwards;
-  transform-origin: 500px 340px;
-}
-.folding .rings-front {
-  animation: open-front 2s ease-in-out forwards;
-  transform-origin: 500px 400px;
-}
-.folding .rings-back {
-  animation: open-back 2s ease-in-out forwards;
-  transform-origin: 500px 250px;
-}
-.door-left,
-.door-right {
-  transition: transform 1s 0.6s;
-}
-.folding .door-left {
-  transform: translateX(-36px);
-}
-.folding .door-right {
-  transform: translateX(36px);
 }
 .room-scene {
   animation: room-in 1s ease-out both;
@@ -762,27 +715,6 @@ footer span:last-child {
     transform: translateY(-18px);
   }
 }
-@keyframes zoom-in {
-  65% {
-    transform: scale(1.2);
-  }
-  100% {
-    transform: scale(2.7);
-    opacity: 0;
-  }
-}
-@keyframes open-front {
-  to {
-    transform: translateY(150px) rotate(17deg);
-    opacity: 0;
-  }
-}
-@keyframes open-back {
-  to {
-    transform: translateY(-120px) rotate(-13deg);
-    opacity: 0;
-  }
-}
 @keyframes room-in {
   from {
     opacity: 0;
@@ -816,9 +748,6 @@ footer span:last-child {
 .reduced-motion * {
   animation: none !important;
   transition: none !important;
-}
-.reduced-motion .folding .machine {
-  opacity: 0.5;
 }
 .low-effects .backdrop {
   opacity: 0.45;

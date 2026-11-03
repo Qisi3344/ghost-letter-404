@@ -1,0 +1,276 @@
+import { pathToFileURL } from "node:url";
+import { homedir } from "node:os";
+import { mkdirSync, writeFileSync } from "node:fs";
+import assert from "node:assert/strict";
+const { chromium } = await import(
+  pathToFileURL(
+    process.env.PLAYWRIGHT_PATH ||
+      homedir() +
+        "/.codex/skills/develop-web-game/node_modules/playwright/index.mjs",
+  )
+);
+const browser = await chromium.launch({
+  executablePath:
+    process.env.CHROME_PATH ||
+    "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
+  headless: true,
+});
+const page = await browser.newPage({
+    viewport: { width: 1440, height: 1120 },
+    deviceScaleFactor: 1,
+    hasTouch: true,
+  }),
+  errors = [];
+page.on("pageerror", (e) => errors.push(e.message));
+page.on("console", (m) => {
+  if (m.type() === "error") errors.push(m.text());
+});
+const url = process.env.STAGE_URL || "http://127.0.0.1:4173/stage-a/index.html",
+  out = process.env.STAGE_OUT || "docs/visual/stage-a";
+mkdirSync(out, { recursive: true });
+try {
+  const images = [];
+  for (let pose = 0; pose < 3; pose++) {
+    await page.goto(`${url}?pose=${pose}`);
+    await page.waitForFunction(() => window.scene?.stats.frames > 0);
+    assert.equal(await page.locator("#error").textContent(), "");
+    const png = await page.locator("canvas").screenshot({
+      path: `${out}/${pose === 0 ? "main-stage-1x" : `pose-${pose}`}.png`,
+    });
+    images.push(png);
+  }
+  assert(
+    !images[0].equals(images[1]) && !images[1].equals(images[2]),
+    "poses must change the actual rendered image",
+  );
+  await page.goto(`${url}?depth=1`);
+  await page.waitForFunction(() => window.scene?.stats.frames > 0);
+  await page
+    .locator("canvas")
+    .screenshot({ path: `${out}/main-stage-depth-check.png` });
+  await page.goto(`${url}?motion=1`);
+  await page.waitForFunction(() => window.scene?.stats.frames > 2);
+  const before = await page.evaluate(() => scene.stats.frames);
+  await page.waitForTimeout(2000);
+  const stats = await page.evaluate(() => ({ ...scene.stats }));
+  assert(stats.frames > before + 10, "motion did not advance");
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.waitForTimeout(100);
+  const paused = await page.evaluate(() => scene.stats.frames);
+  await page.waitForTimeout(250);
+  assert.equal(
+    await page.evaluate(() => scene.stats.frames),
+    paused,
+    "reduced motion must stop rendering",
+  );
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(url);
+  await page.waitForFunction(() => window.scene?.stats.frames > 0);
+  assert.equal(
+    await page.locator("#wheel").getAttribute("aria-valuenow"),
+    "12",
+  );
+  const fixedFrames = await page.evaluate(() => scene.stats.frames);
+  await page.waitForTimeout(150);
+  assert.equal(await page.evaluate(() => scene.stats.frames), fixedFrames);
+  assert(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  );
+  await page.screenshot({ path: `${out}/main-stage-mobile.png` });
+  await page.keyboard.press("Tab");
+  assert.equal(await page.locator(":focus").getAttribute("id"), "wheel");
+  await page.keyboard.press("ArrowRight");
+  assert.equal(
+    await page.locator("#wheel").getAttribute("aria-valuenow"),
+    "14",
+  );
+  await page.locator('[data-ring="1"]').click();
+  const wheel = page.locator("#wheel");
+  const bounds = await wheel.boundingBox(),
+    x = bounds.x + bounds.width / 2,
+    y = bounds.y + bounds.height / 2;
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchStart",
+    touchPoints: [{ x, y }],
+  });
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchMove",
+    touchPoints: [{ x: x + 60, y: y - 10 }],
+  });
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchEnd",
+    touchPoints: [],
+  });
+  assert.equal(
+    await page.evaluate(() => Math.round(scene.stats.angles[1])),
+    96,
+    "touch must turn the middle orbit",
+  );
+  await page.locator("#reset").click();
+  assert.deepEqual(await page.evaluate(() => scene.stats.angles), [12, 54, 62]);
+  await page.locator("nav a").nth(1).focus();
+  await page.keyboard.press("Enter");
+  await page.waitForURL("**?pose=1");
+  await page.waitForFunction(() => window.scene?.stats.frames > 0);
+  assert.equal(
+    await page.locator('[aria-current="page"]').textContent(),
+    "姿态 B",
+  );
+  const responsiveWidths = [390, 600, 601, 768];
+  for (const width of responsiveWidths) {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.waitForTimeout(100);
+    const ratios = await page.locator("canvas").evaluate((canvas) => {
+      const gl = canvas.getContext("webgl2"),
+        program = gl.getParameter(gl.CURRENT_PROGRAM);
+      const frame = gl.getUniform(
+        program,
+        gl.getUniformLocation(program, "frameSize"),
+      );
+      return [frame[0] / frame[1], canvas.clientWidth / canvas.clientHeight];
+    });
+    assert(
+      Math.abs(ratios[0] - ratios[1]) < 0.001,
+      `${width}px: distorted projection`,
+    );
+    assert(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    );
+  }
+  await page.setViewportSize({ width: 1440, height: 1250 });
+  await page.goto(url);
+  await page.waitForFunction(() => window.scene?.stats.frames > 0);
+  const imageBefore = await page.locator("canvas").screenshot();
+  const dial = await wheel.boundingBox();
+  await page.mouse.move(dial.x + dial.width / 2, dial.y + dial.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(
+    dial.x + dial.width / 2 + 80,
+    dial.y + dial.height / 2 - 20,
+    { steps: 8 },
+  );
+  await page.mouse.up();
+  assert.equal(
+    await page.evaluate(() => Math.round(scene.stats.angles[0])),
+    72,
+    "mouse must turn the outer orbit",
+  );
+  assert(
+    !imageBefore.equals(await page.locator("canvas").screenshot()),
+    "orbit control must change pixels",
+  );
+  await page.screenshot({ path: `${out}/controls-desktop.png` });
+  await wheel.focus();
+  await page.keyboard.press("End");
+  await page.keyboard.press("ArrowRight");
+  assert.equal(
+    await wheel.getAttribute("aria-valuenow"),
+    "1",
+    "angles must wrap",
+  );
+  await page.locator('[data-ring="2"]').click();
+  await wheel.focus();
+  await page.keyboard.press("ArrowLeft");
+  assert.equal(await page.evaluate(() => scene.stats.angles[2]), 60);
+  await page.locator("#reset").click();
+  assert.deepEqual(await page.evaluate(() => scene.stats.angles), [12, 54, 62]);
+  await page.goto(`${url}?motion=1`);
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.waitForFunction(() => window.scene?.stats.frames > 3);
+  await wheel.focus();
+  await page.keyboard.press("ArrowRight");
+  await page.waitForTimeout(100);
+  const manualFrame = await page.evaluate(() => scene.stats.frames);
+  await page.waitForTimeout(200);
+  assert.equal(
+    await page.evaluate(() => scene.stats.frames),
+    manualFrame,
+    "manual input must pause the idle tour",
+  );
+  assert.deepEqual(errors, []);
+  // Exercise the real initialization failure, rather than just opening a demo URL.
+  const fallback = await browser.newPage({
+    viewport: { width: 390, height: 844 },
+  });
+  await fallback.addInitScript(() => {
+    const getContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (type, ...args) {
+      return type === "webgl2" ? null : getContext.call(this, type, ...args);
+    };
+  });
+  await fallback.goto(url);
+  await fallback.locator("#error[role=alert]").waitFor();
+  assert.match(await fallback.locator("#error").textContent(), /WebGL 2/);
+  for (const selector of ["canvas", "#wheel", "#controls", "nav"])
+    assert.equal(await fallback.locator(selector).isVisible(), false);
+  await fallback.keyboard.press("Tab");
+  assert.equal(
+    await fallback.locator(":focus").textContent(),
+    "重新尝试加载舞台",
+  );
+  await fallback.screenshot({ path: `${out}/webgl-unavailable.png` });
+  await fallback.close();
+  const recovery = await browser.newPage({
+    viewport: { width: 1440, height: 1250 },
+  });
+  await recovery.goto(`${url}?webgl=off`);
+  await recovery.getByRole("link", { name: "重新尝试加载舞台" }).click();
+  await recovery.waitForFunction(() => window.scene?.stats.frames > 0);
+  assert.equal(await recovery.locator("#error").textContent(), "");
+  await recovery.evaluate(() => {
+    document
+      .querySelector("canvas")
+      .getContext("webgl2")
+      .getExtension("WEBGL_lose_context")
+      .loseContext();
+  });
+  await recovery.locator("#error[role=alert]").waitFor();
+  assert.match(await recovery.locator("#error").textContent(), /连接已中断/);
+  assert.equal(await recovery.locator("#wheel").isVisible(), false);
+  const lostFrames = await recovery.evaluate(() => scene.stats.frames);
+  await recovery.waitForTimeout(200);
+  assert.equal(await recovery.evaluate(() => scene.stats.frames), lostFrames);
+  await recovery.screenshot({ path: `${out}/webgl-context-lost.png` });
+  await recovery.close();
+  const report = {
+    capturedAt: new Date().toISOString(),
+    browserVersion: browser.version(),
+    url,
+    parts: stats.parts,
+    triangles: stats.triangles,
+    framesIn2Seconds: stats.frames - before,
+    submitMs: stats.submitMs,
+    threePoses: true,
+    depthCapture: true,
+    reducedMotion: true,
+    mobileWidth: 390,
+    horizontalOverflow: false,
+    keyboardNavigation: true,
+    responsiveWidths,
+    orbitControl: {
+      mouse: true,
+      touch: true,
+      keyboard: true,
+      reset: true,
+      wrap: true,
+      idleHandoff: true,
+    },
+    webglFallback: {
+      nullContext: true,
+      contextLoss: true,
+      stopsRendering: true,
+      keyboardRetry: true,
+      retry: true,
+    },
+    errors,
+  };
+  writeFileSync(`${out}/browser.json`, JSON.stringify(report, null, 2));
+  console.log(report);
+} finally {
+  await browser.close();
+}
